@@ -3,7 +3,10 @@ var DEBUG = true;
 var AUTHOR = "Benjamin";
 
 //GLOBAL CONSTANTS
-var UPS = 60;
+var JOYSTICK_SIZE = 0.4;//In terms of the smaller of the two screen dimensions
+var IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+
+var UPS = IS_TOUCH_DEVICE ? 15 : 60;//Reduced framerate on mobile
 var NUM_RESOURCES = 197;
 var IMAGE_DIR = "images/";
 var SOUND_DIR = "sound/";
@@ -20,7 +23,7 @@ var LEV_START_DELAY = 2;
 if(DEBUG) LEV_START_DELAY = 1;
 var LEV_STOP_DELAY = 2;
 if(DEBUG) LEV_STOP_DELAY = 1;
-var ANIMATION_DURATION = 8;//How many times the game has to render before the image changes
+var ANIMATION_DURATION = Math.round(8*UPS/60);//How many times the game has to render before the image changes
 
 var DEFAULT_VOLUME = 0.7;
 
@@ -48,9 +51,6 @@ var ERR_NOSAVE = 2;
 var ERR_WRONGPW = 3;
 var ERR_NOTFOUND = 4;
 var ERR_EMPTYNAME = 5;
-
-var JOYSTICK_SIZE = 0.4;//In terms of the smaller of the two screen dimensions
-var IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
 
 //Check storage
 var HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
@@ -300,18 +300,18 @@ function CLASS_resources(){
 		////////////////////////////////////////////////////////
 		
 		var soundarray = [
-		"about.wav",
-		"argl.wav",
-		"attack1.wav",
-		"attack2.wav",
-		"chart.wav",
-		"click.wav",
-		"gameend.wav",
-		"getpoint.wav",
-		"newplane.wav",
-		"opendoor.wav",
-		"wow.wav",
-		"yeah.wav"];
+		"about.mp3",
+		"argl.mp3",
+		"attack1.mp3",
+		"attack2.mp3",
+		"chart.mp3",
+		"click.mp3",
+		"gameend.mp3",
+		"getpoint.mp3",
+		"newplane.mp3",
+		"opendoor.mp3",
+		"wow.mp3",
+		"yeah.mp3"];
 		
 		for(var i = 0; i < soundarray.length; i++){
 			that.sounds[i] = new Audio();
@@ -340,6 +340,7 @@ function CLASS_input(){
 	var that = this;
 	
 	function handle_keydown_global(evt) {
+		game.remove_soundrestriction();
 		that.keys_down[evt.keyCode] = true;
 		if(that.keys_down[37]){
 			game.walk_dir = DIR_LEFT;
@@ -380,6 +381,7 @@ function CLASS_input(){
 	};
 	
 	function handle_mousedown_global(evt) {
+		game.remove_soundrestriction();
 		that.mouse_down = true;
 		if(vis !== null && vis.dbx !== null && vis.dbx.style.display != "none"){
 			var rel_pos = {x:that.mouse_pos_global.x - parseInt(vis.dbx.style.left), y:that.mouse_pos_global.y - parseInt(vis.dbx.style.top)};
@@ -583,6 +585,7 @@ function CLASS_input(){
 	}
 	
 	function handle_touch_global(evt){
+		game.remove_soundrestriction();
 		//evt.preventDefault();
 		var touches = evt.changedTouches;
 		var rect = JOYSTICK.getBoundingClientRect();
@@ -600,36 +603,39 @@ function CLASS_input(){
 			if(x >= 0 && x <= JOYSTICK.width && y >= 0 && y <= JOYSTICK.height){
 				if(x >= y){
 					if(-x+JOYSTICK.height >= y){
-						input.joystick_dir = DIR_UP;
+						that.joystick_dir = DIR_UP;
 						changed = true;
 					}else{
-						input.joystick_dir = DIR_RIGHT;
+						that.joystick_dir = DIR_RIGHT;
 						changed = true;
 					}
 				}else{
 					if(-x+JOYSTICK.width >= y){
-						input.joystick_dir = DIR_LEFT;
+						that.joystick_dir = DIR_LEFT;
 						changed = true;
 					}else{
-						input.joystick_dir = DIR_DOWN;
+						that.joystick_dir = DIR_DOWN;
 						changed = true;
 					}
 				}
 				
-				render_joystick(x, y);
+				if(Date.now() - that.last_joystick_render > 15){
+					render_joystick(x, y);
+					that.last_joystick_render = Date.now();
+				}
 			}
 		}
 		
 		if(!changed) {
 			render_joystick();
-			input.joystick_dir = DIR_NONE;
+			that.joystick_dir = DIR_NONE;
 		}
 	}
 	
 	function handle_touchend_global(evt){
 		//evt.preventDefault();
 		render_joystick();
-		input.joystick_dir = DIR_NONE;
+		that.joystick_dir = DIR_NONE;
 	}
 	
 //Public:
@@ -644,6 +650,7 @@ function CLASS_input(){
 	
 	if(IS_TOUCH_DEVICE){
 		this.joystick_dir = DIR_NONE;
+		this.last_joystick_render = Date.now();
 	}
 	
 	this.init = function(){
@@ -1193,8 +1200,8 @@ function CLASS_game(){
 	//GAME CLASS
 	//Core engine, entity class, game ending criteria and much more
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
-	this.move_speed = 1;
-	this.door_removal_delay = 8;
+	this.move_speed = Math.round(1*60/UPS);
+	this.door_removal_delay = Math.round(8*UPS/60);
 	
 	this.initialized = false;
 	this.wait_timer = INTRO_DURATION*UPS;
@@ -1224,6 +1231,7 @@ function CLASS_game(){
 	this.buttons_activated[1] = true;
 	
 	this.sound = !DEBUG;
+	this.soundrestriction_removed = false;
 	
 	this.load_level = function(lev_number){
 		that.mode = 1;
@@ -1691,7 +1699,7 @@ function CLASS_game(){
 	
 	this.play_sound = function(id){
 		if(!that.sound) return;
-		if(!res.sounds[id].currentTime==0) res.sounds[id].currentTime=0;//Something is sometimes wrong here... DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		if(res.sounds[id].currentTime!=0) res.sounds[id].currentTime=0;
 		res.sounds[id].play();
 		//Useful commands
 		//audioElement.pause();
@@ -1718,9 +1726,28 @@ function CLASS_game(){
 	this.toggle_sound = function(){
 		if(that.sound){
 			that.sound = false;
+			for(var i = 0; i < res.sounds.length; i++){
+				res.sounds[i].pause();
+				res.sounds[i].currentTime=0
+			}
 		}else{
 			that.sound = true;
 		}
+	}
+	
+	//This is necessary because of mobile browsers. These browsers block sound playback
+	//unless it is triggered by a user input event. Play all sounds at the first input,
+	//then the restriction is lifted for further playbacks.
+	this.remove_soundrestriction = function(){
+		if(that.soundrestriction_removed) return;
+		for(var i = 0; i < res.sounds.length; i++){
+			if(res.sounds[i].paused) {
+				res.sounds[i].play();
+				res.sounds[i].pause();
+				res.sounds[i].currentTime=0
+			}
+		}
+		that.soundrestriction_removed = true;
 	}
 	
 	this.toggle_single_steps = function(){
@@ -2878,30 +2905,28 @@ function render_field_subset(consumable){
 	for(var y = 0; y < LEV_DIMENSION_Y; y++){
 		for(var x = 0; x < LEV_DIMENSION_X; x++){
 			var block = game.level_array[x][y];
-			if(block.id != 0){//Empty space doesn't need to be rendered
-				if(y > 0 && game.level_array[x][y-1].moving && game.level_array[x][y-1].face_dir == DIR_DOWN && game.level_array[x][y-1].consumable == consumable){
-					render_block(x, y-1, RENDER_BOTTOM);
-				}
-				
-				if(y > 0 && (!game.level_array[x][y-1].moving) && game.level_array[x][y-1].consumable == consumable){
-					if(x > 0 && game.level_array[x-1][y].face_dir != DIR_RIGHT){
-						render_block(x, y-1, RENDER_BOTTOM_BORDER);
-					}
-				}
+			if(y > 0 && game.level_array[x][y-1].moving && game.level_array[x][y-1].face_dir == DIR_DOWN && game.level_array[x][y-1].consumable == consumable){
+				render_block(x, y-1, RENDER_BOTTOM);
+			}
 			
-				if(block.consumable == consumable){
-					if(!block.moving || block.face_dir == DIR_LEFT || block.face_dir == DIR_RIGHT){
-						render_block(x, y, RENDER_FULL);
-					}else if(block.face_dir == DIR_DOWN){
-						render_block(x, y, RENDER_TOP);
-					}else if(block.face_dir == DIR_UP){
-						render_block(x, y, RENDER_BOTTOM);
-					}
+			if(y > 0 && (!game.level_array[x][y-1].moving) && game.level_array[x][y-1].consumable == consumable){
+				if(x > 0 && game.level_array[x-1][y].face_dir != DIR_RIGHT){
+					render_block(x, y-1, RENDER_BOTTOM_BORDER);
 				}
-				
-				if(y+1 < LEV_DIMENSION_Y && game.level_array[x][y+1].moving && game.level_array[x][y+1].face_dir == DIR_UP && game.level_array[x][y+1].consumable == consumable){
-					render_block(x, y+1, RENDER_TOP);
+			}
+		
+			if(block.consumable == consumable){
+				if(!block.moving || block.face_dir == DIR_LEFT || block.face_dir == DIR_RIGHT){
+					render_block(x, y, RENDER_FULL);
+				}else if(block.face_dir == DIR_DOWN){
+					render_block(x, y, RENDER_TOP);
+				}else if(block.face_dir == DIR_UP){
+					render_block(x, y, RENDER_BOTTOM);
 				}
+			}
+			
+			if(y+1 < LEV_DIMENSION_Y && game.level_array[x][y+1].moving && game.level_array[x][y+1].face_dir == DIR_UP && game.level_array[x][y+1].consumable == consumable){
+				render_block(x, y+1, RENDER_TOP);
 			}
 		}
 	}
@@ -2917,6 +2942,8 @@ function render_block(x, y, render_option){
 		block.animation_delay -= ANIMATION_DURATION;
 		needs_update = true;
 	}
+	
+	if(game.level_array[x][y].id <= 0) return;//Optimization (empty and dummy block can't be drawn)
 	
 	if(needs_update)
 	switch (game.level_array[x][y].id) {
