@@ -316,6 +316,14 @@ function CLASS_input(){
 		}else if(that.keys_down[40]){
 			game.walk_dir = DIR_DOWN;
 		}
+		
+		if(vis.dbx.firstChild){//If a dialog box is open
+			if(that.keys_down[13]){//Enter
+				vis.dbx.enterfun();
+			}else if(that.keys_down[27]){//Esc
+				vis.dbx.cancelfun();
+			}
+		}
 	}
 
 	function handle_keyup_global(evt) {
@@ -584,6 +592,10 @@ function CLASS_game(){
 	//Private:
 	var that = this;
 	
+	
+	//////////////////////////////////////////////////////////////////////////////
+	//Savegame section:
+	//////////////////////////////////////////////////////////////////////////////
 	function CLASS_savegame(){
 		this.usernumber = -1;
 	
@@ -772,6 +784,7 @@ function CLASS_game(){
 		this.face_dir = DIR_DOWN;
 		this.berti_id = -1;//Multiple bertis are possible, this makes the game engine much more flexible
 		this.sees_berti = false;
+		this.last_seen_berti = {x: -1, y: -1};
 		this.just_moved = false;
 		this.gets_removed_in = -1;//Removal timer for doors
 		
@@ -799,264 +812,276 @@ function CLASS_game(){
 		this.fine_offset_x = 0;
 		this.fine_offset_y = 0;
 		//end visual
-		
-		this.move_randomly = function(curr_x, curr_y){
-			if(!that.moving){
-				var tried_forward = false;
-				var back_dir = game.opposite_dir(that.face_dir);
-				var possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
-				for(var i = 0; i < possibilities.length; i++){
-					if(possibilities[i] == that.face_dir || possibilities[i] == back_dir){
-						possibilities.splice(i, 1);
-						i--;
-					}
+	}
+	CLASS_entity.prototype.move_randomly = function(curr_x, curr_y){
+		if(!this.moving){
+			var tried_forward = false;
+			var back_dir = game.opposite_dir(this.face_dir);
+			var possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
+			for(var i = 0; i < possibilities.length; i++){
+				if(possibilities[i] == this.face_dir || possibilities[i] == back_dir){
+					possibilities.splice(i, 1);
+					i--;
 				}
-				
-				if(Math.random() < 0.80){
-					if(game.walkable(curr_x, curr_y, that.face_dir)){
-						game.start_move(curr_x, curr_y, that.face_dir);
-						return;
-					}
-					tried_forward = true;
-				}
-				
-				while(possibilities.length > 0){
-					var selection = Math.floor(Math.random()*possibilities.length);
-					if(game.walkable(curr_x, curr_y, possibilities[selection])){
-						game.start_move(curr_x, curr_y, possibilities[selection]);
-						return;
-					}else{
-						possibilities.splice(selection, 1);
-					}
-				}
-				
-				if(!tried_forward){
-					if(game.walkable(curr_x, curr_y, that.face_dir)){
-						game.start_move(curr_x, curr_y, that.face_dir);
-						return;
-					}
-				}
-				
-				if(game.walkable(curr_x, curr_y, back_dir)){
-					game.start_move(curr_x, curr_y, back_dir);
+			}
+			
+			if(Math.random() < 0.80){
+				if(game.walkable(curr_x, curr_y, this.face_dir)){
+					game.start_move(curr_x, curr_y, this.face_dir);
 					return;
 				}
-				//Here's the code if that dude can't go anywhere: (none)
+				tried_forward = true;
 			}
+			
+			while(possibilities.length > 0){
+				var selection = Math.floor(Math.random()*possibilities.length);
+				if(game.walkable(curr_x, curr_y, possibilities[selection])){
+					game.start_move(curr_x, curr_y, possibilities[selection]);
+					return;
+				}else{
+					possibilities.splice(selection, 1);
+				}
+			}
+			
+			if(!tried_forward){
+				if(game.walkable(curr_x, curr_y, this.face_dir)){
+					game.start_move(curr_x, curr_y, this.face_dir);
+					return;
+				}
+			}
+			
+			if(game.walkable(curr_x, curr_y, back_dir)){
+				game.start_move(curr_x, curr_y, back_dir);
+				return;
+			}
+			//Here's the code if that dude can't go anywhere: (none)
 		}
-		
-		this.chase_berti = function(curr_x, curr_y){
-			if(!that.moving){
-				var closest_dist = LEV_DIMENSION_X + LEV_DIMENSION_Y + 1;
-				var closest_berti = -1;
+	}
+	CLASS_entity.prototype.chase_berti = function(curr_x, curr_y){
+		if(!this.moving){
+			var closest_dist = LEV_DIMENSION_X + LEV_DIMENSION_Y + 1;
+			var closest_berti = -1;
+			
+			for(var i = 0; i < game.berti_positions.length; i++){
+				var face_right_direction = 
+				(this.face_dir == DIR_DOWN && game.berti_positions[i].y >= curr_y) || 
+				(this.face_dir == DIR_UP && game.berti_positions[i].y <= curr_y) || 
+				(this.face_dir == DIR_LEFT && game.berti_positions[i].x <= curr_x) || 
+				(this.face_dir == DIR_RIGHT && game.berti_positions[i].x >= curr_x);
 				
-				for(var i = 0; i < game.berti_positions.length; i++){
-					var face_right_direction = 
-					(that.face_dir == DIR_DOWN && game.berti_positions[i].y >= curr_y) || 
-					(that.face_dir == DIR_UP && game.berti_positions[i].y <= curr_y) || 
-					(that.face_dir == DIR_LEFT && game.berti_positions[i].x <= curr_x) || 
-					(that.face_dir == DIR_RIGHT && game.berti_positions[i].x >= curr_x);
+				if(face_right_direction && game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
+					var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);//Manhattan distance
+					if(distance < closest_dist || (distance == closest_dist && Math.random() < 0.50)){
+						closest_dist = distance;
+						closest_berti = i;
+					}
+				}
+			}
+			
+			if(closest_berti == -1){//Can't see berti; Random search
+				this.sees_berti = false;
+				this.move_randomly(curr_x, curr_y);
+			}else{//Chasing code here.
+				if(!this.sees_berti){
+					this.sees_berti = true;
 					
-					if(face_right_direction && game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
-						var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);//Manhattan distance
-						if(distance < closest_dist || (distance == closest_dist && Math.random() < 0.50)){
-							closest_dist = distance;
-							closest_berti = i;
-						}
+					//if(this.last_seen_berti.x != game.berti_positions[closest_berti].x || this.last_seen_berti.y != game.berti_positions[closest_berti].y){
+					if(this.id == 7){
+						game.play_sound(2);
+					}else if(this.id == 10){
+						game.play_sound(3);
+					}
+				}
+				this.last_seen_berti.x = game.berti_positions[closest_berti].x;
+				this.last_seen_berti.y = game.berti_positions[closest_berti].y;
+				
+				var diff_x = game.berti_positions[closest_berti].x - curr_x;
+				var diff_y = game.berti_positions[closest_berti].y - curr_y;
+				
+				//THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
+				if(game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y].moving){
+					var next_pos = game.dir_to_coords(game.berti_positions[closest_berti].x, game.berti_positions[closest_berti].y, game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y].face_dir);
+					if(Math.abs(curr_x - next_pos.x) + Math.abs(curr_y - next_pos.y) == 1) return;
+				}//END OF OPTIONAL FIX
+				
+				var dir1;
+				var dir2;
+				
+				if(diff_x == 0){
+					if(diff_y == 0){//This should NEVER happen.
+						alert("001: Something went mighty wrong! Blame the programmer!");
+						this.move_randomly(curr_x, curr_y);
+						return;
+					}else if(diff_y > 0){
+						dir1 = dir2 = DIR_DOWN;
+					}else{//diff_y < 0
+						dir1 = dir2 = DIR_UP;
+					}
+				}else if(diff_x > 0){
+					if(diff_y == 0){
+						dir1 = dir2 = DIR_RIGHT;
+					}else if(diff_y > 0){
+						dir1 = DIR_RIGHT;
+						dir2 = DIR_DOWN;
+					}else{//diff_y < 0
+						dir1 = DIR_RIGHT
+						dir2 = DIR_UP;
+					}
+				}else{//diff_x < 0
+					if(diff_y == 0){
+						dir1 = dir2 = DIR_LEFT;
+					}else if(diff_y > 0){
+						dir1 = DIR_LEFT;
+						dir2 = DIR_DOWN;
+					}else{//diff_y < 0
+						dir1 = DIR_LEFT
+						dir2 = DIR_UP;
 					}
 				}
 				
-				if(closest_berti == -1){//Can't see berti; Random search
-					that.sees_berti = false;
-					that.move_randomly(curr_x, curr_y);
-				}else{//Chasing code here.
-					if(!that.sees_berti){
-						that.sees_berti = true;
-						if(that.id == 7){
-							game.play_sound(2);
-						}else if(that.id == 10){
-							game.play_sound(3);
-						}
+				if(dir1 != dir2){
+					var total_distance = Math.abs(diff_x) + Math.abs(diff_y);
+					var percentage_x = Math.abs(diff_x / total_distance);
+					
+					if(Math.random() >= percentage_x){
+						var swapper = dir1;
+						dir1 = dir2;
+						dir2 = swapper;
 					}
-					var diff_x = game.berti_positions[closest_berti].x - curr_x;
-					var diff_y = game.berti_positions[closest_berti].y - curr_y;
-					
-					//THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
-					/*if(diff_x == 0 && Math.abs(diff_y) == 2 && game.level_array[curr_x][curr_y + diff_y/2].id == -1){
-						return;
-					}else if(diff_y == 0 && Math.abs(diff_x) == 2 && game.level_array[curr_x + diff_x/2][curr_y].id == -1){
-						return;
-					}*///END OF OPTIONAL FIX DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					
-					var dir1;
-					var dir2;
-					
-					if(diff_x == 0){
-						if(diff_y == 0){//This should NEVER happen.
-							alert("001: Something went mighty wrong! Blame the programmer!");
-							that.move_randomly(curr_x, curr_y);
-							return;
-						}else if(diff_y > 0){
-							dir1 = dir2 = DIR_DOWN;
-						}else{//diff_y < 0
-							dir1 = dir2 = DIR_UP;
-						}
-					}else if(diff_x > 0){
-						if(diff_y == 0){
-							dir1 = dir2 = DIR_RIGHT;
-						}else if(diff_y > 0){
-							dir1 = DIR_RIGHT;
-							dir2 = DIR_DOWN;
-						}else{//diff_y < 0
-							dir1 = DIR_RIGHT
-							dir2 = DIR_UP;
-						}
-					}else{//diff_x < 0
-						if(diff_y == 0){
-							dir1 = dir2 = DIR_LEFT;
-						}else if(diff_y > 0){
-							dir1 = DIR_LEFT;
-							dir2 = DIR_DOWN;
-						}else{//diff_y < 0
-							dir1 = DIR_LEFT
-							dir2 = DIR_UP;
-						}
-					}
-					
-					if(dir1 != dir2){
-						var total_distance = Math.abs(diff_x) + Math.abs(diff_y);
-						var percentage_x = Math.abs(diff_x / total_distance);
-						
-						if(Math.random() >= percentage_x){
-							var swapper = dir1;
-							dir1 = dir2;
-							dir2 = swapper;
-						}
-						if(game.walkable(curr_x, curr_y, dir1)){
-							game.start_move(curr_x, curr_y, dir1);
-						}else if(game.walkable(curr_x, curr_y, dir2)){
-							game.start_move(curr_x, curr_y, dir2);
-						}else{
-							that.move_randomly(curr_x, curr_y);
-						}
+					if(game.walkable(curr_x, curr_y, dir1)){
+						game.start_move(curr_x, curr_y, dir1);
+					}else if(game.walkable(curr_x, curr_y, dir2)){
+						game.start_move(curr_x, curr_y, dir2);
 					}else{
-						if(game.walkable(curr_x, curr_y, dir1)){
-							game.start_move(curr_x, curr_y, dir1);
-						}else{
-							that.move_randomly(curr_x, curr_y);
-						}
+						this.move_randomly(curr_x, curr_y);
 					}
-					
-				}
-			}
-		}
-		
-		this.update_entity = function(curr_x, curr_y){
-		
-			that.animation_delay++;//This is an important link between the game logic and animation timing.
-			
-			if(that.moving){
-				switch (that.face_dir) {
-					case DIR_UP:
-						that.moving_offset.y -= game.move_speed;
-						break;
-					case DIR_DOWN:
-						that.moving_offset.y += game.move_speed;
-						break;
-					case DIR_LEFT:
-						that.moving_offset.x -= game.move_speed;
-						break;
-					case DIR_RIGHT:
-						that.moving_offset.x += game.move_speed;
-						break;
-					default:
-						alert("002: Something went mighty wrong! Blame the programmer!");//This should never be executed
-						break;
-				}
-				if(that.moving_offset.x <= -24 || that.moving_offset.x >= 24 || that.moving_offset.y <= -24 || that.moving_offset.y >= 24){
-					game.move(curr_x, curr_y, that.face_dir);
-					that.just_moved = true;
-				}
-			}
-			
-			if(that.gets_removed_in == 0){
-				if(that.moving){
-					var dst = game.dir_to_coords(curr_x, curr_y, that.face_dir);
-					game.level_array[dst.x][dst.y] = new CLASS_entity(0);
-				}
-				game.level_array[curr_x][curr_y] = new CLASS_entity(0);
-			}else if(that.gets_removed_in > 0){
-				that.gets_removed_in -= 1;
-				vis.update_animation(curr_x, curr_y);
-			}
-		}
-		
-		this.register_input = function(curr_x, curr_y){
-			if(!that.moving){
-				if(input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
-					if(game.walkable(curr_x, curr_y, DIR_LEFT)){
-						game.start_move(curr_x, curr_y, DIR_LEFT);
-					}
-				}else if(input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
-					if(game.walkable(curr_x, curr_y, DIR_UP)){
-						game.start_move(curr_x, curr_y, DIR_UP);
-					}
-				}else if(input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
-					if(game.walkable(curr_x, curr_y, DIR_RIGHT)){
-						game.start_move(curr_x, curr_y, DIR_RIGHT);
-					}
-				}else if(input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
-					if(game.walkable(curr_x, curr_y, DIR_DOWN)){
-						game.start_move(curr_x, curr_y, DIR_DOWN);
+				}else{
+					if(game.walkable(curr_x, curr_y, dir1)){
+						game.start_move(curr_x, curr_y, dir1);
+					}else{
+						this.move_randomly(curr_x, curr_y);
 					}
 				}
-			}
-		}
-		
-		this.check_enemy_proximity = function(curr_x, curr_y){
-			var fine_x = curr_x*24 + that.moving_offset.x;
-			var fine_y = curr_y*24 + that.moving_offset.y;
-			
-			var next_pos;
-			if(that.moving){//DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				next_pos = game.dir_to_coords(curr_x, curr_y, that.face_dir);
-			}else{
-				next_pos = {x:-1,y:-1};
-			}
-			
-			var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
-			for(var i = 0; i < adj_array.length; i++){
-				if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){
-					if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){//If the opponent is diagonally AND
-						if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0 && (adj_array[i].x != next_pos.x || curr_y != next_pos.y)) ||
-						    (game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0 && (curr_x != next_pos.x || adj_array[i].y != next_pos.y))){
-							break;//Don't perform a proximity check for this particular foe.
-						}
-					}else if(that.moving){
-						if((Math.abs(next_pos.x - adj_array[i].x) == 1 && Math.abs(next_pos.y - adj_array[i].y) == 1) &&
-						((game.level_array[adj_array[i].x][next_pos.y].id != -1 && game.level_array[adj_array[i].x][next_pos.y].id != 0 && (adj_array[i].x != curr_x || next_pos.y != curr_y)) ||
-						 (game.level_array[next_pos.x][adj_array[i].y].id != -1 && game.level_array[next_pos.x][adj_array[i].y].id != 0 && (next_pos.x != curr_x || adj_array[i].y != curr_y)))){
-							break;//Don't perform a proximity check for this particular foe.
-						}
-					}
 				
-					var enemy_fine_x = adj_array[i].x*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
-					var enemy_fine_y = adj_array[i].y*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
-					
-					//var dist = Math.sqrt(Math.pow(fine_x-enemy_fine_x, 2) + Math.pow(fine_y-enemy_fine_y, 2));//Pythagoras
-					//dist <= 24+1//Not so good for this game
-					
-					if(Math.abs(fine_x-enemy_fine_x) <= 24 && Math.abs(fine_y-enemy_fine_y) <= 24){//Actual hit test
-						game.play_sound(1);
-						game.wait_timer = LEV_STOP_DELAY*UPS;
-						game.level_ended = 2;
-						vis.update_all_animations();
-						return;
-					}
+			}
+		}
+	}
+	
+	CLASS_entity.prototype.update_entity = function(curr_x, curr_y){
+		this.animation_delay++;//This is an important link between the game logic and animation timing.
+		
+		if(this.moving){
+			switch (this.face_dir) {
+				case DIR_UP:
+					this.moving_offset.y -= game.move_speed;
+					break;
+				case DIR_DOWN:
+					this.moving_offset.y += game.move_speed;
+					break;
+				case DIR_LEFT:
+					this.moving_offset.x -= game.move_speed;
+					break;
+				case DIR_RIGHT:
+					this.moving_offset.x += game.move_speed;
+					break;
+				default:
+					alert("002: Something went mighty wrong! Blame the programmer!");//This should never be executed
+					break;
+			}
+			if(this.moving_offset.x <= -24 || this.moving_offset.x >= 24 || this.moving_offset.y <= -24 || this.moving_offset.y >= 24){
+				game.move(curr_x, curr_y, this.face_dir);
+				this.just_moved = true;
+			}
+		}
+		
+		if(this.gets_removed_in == 0){
+			if(this.moving){
+				var dst = game.dir_to_coords(curr_x, curr_y, this.face_dir);
+				game.level_array[dst.x][dst.y] = new CLASS_entity(0);
+			}
+			game.level_array[curr_x][curr_y] = new CLASS_entity(0);
+		}else if(this.gets_removed_in > 0){
+			this.gets_removed_in -= 1;
+			vis.update_animation(curr_x, curr_y);
+		}
+	}
+	
+	CLASS_entity.prototype.register_input = function(curr_x, curr_y){
+		if(!this.moving){
+			if(input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
+				if(game.walkable(curr_x, curr_y, DIR_LEFT)){
+					game.start_move(curr_x, curr_y, DIR_LEFT);
+				}
+			}else if(input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
+				if(game.walkable(curr_x, curr_y, DIR_UP)){
+					game.start_move(curr_x, curr_y, DIR_UP);
+				}
+			}else if(input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
+				if(game.walkable(curr_x, curr_y, DIR_RIGHT)){
+					game.start_move(curr_x, curr_y, DIR_RIGHT);
+				}
+			}else if(input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
+				if(game.walkable(curr_x, curr_y, DIR_DOWN)){
+					game.start_move(curr_x, curr_y, DIR_DOWN);
 				}
 			}
 		}
-
+	}
+	//After each update, this function gets called for (every) Berti to see if he's gotten caught!
+	CLASS_entity.prototype.check_enemy_proximity = function(curr_x, curr_y){
+		var fine_x = curr_x*24 + this.moving_offset.x;
+		var fine_y = curr_y*24 + this.moving_offset.y;
+		
+		var next_pos;
+		if(this.moving){
+			next_pos = game.dir_to_coords(curr_x, curr_y, this.face_dir);
+		}else{
+			next_pos = {x:-1,y:-1};
+		}
+		
+		var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
+		for(var i = 0; i < adj_array.length; i++){
+			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){//If there's an opponent on this adjacent tile
+			
+				if(game.level_array[adj_array[i].x][adj_array[i].y].moving){//If the opponent is moving
+					var enemy_np = game.dir_to_coords(adj_array[i].x, adj_array[i].y, game.level_array[adj_array[i].x][adj_array[i].y].face_dir);
+					
+					if(Math.abs(curr_x - enemy_np.x) == 1 && Math.abs(curr_y - enemy_np.y) == 1){//If the opponent's destination is diagonally AND
+						if((game.level_array[enemy_np.x][curr_y].id != -1 && game.level_array[enemy_np.x][curr_y].id != 0 && (enemy_np.x != next_pos.x || curr_y != next_pos.y)) ||
+							(game.level_array[curr_x][enemy_np.y].id != -1 && game.level_array[curr_x][enemy_np.y].id != 0 && (curr_x != next_pos.x || enemy_np.y != next_pos.y))){
+							break;//Don't perform a proximity check for this particular foe.
+						}
+					}
+				}
+			
+				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){//If the opponent is diagonally AND
+					if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0 && (adj_array[i].x != next_pos.x || curr_y != next_pos.y)) ||
+						(game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0 && (curr_x != next_pos.x || adj_array[i].y != next_pos.y))){
+						break;//Don't perform a proximity check for this particular foe.
+					}
+				}else if(this.moving){
+					if((Math.abs(next_pos.x - adj_array[i].x) == 1 && Math.abs(next_pos.y - adj_array[i].y) == 1) &&
+					((game.level_array[adj_array[i].x][next_pos.y].id != -1 && game.level_array[adj_array[i].x][next_pos.y].id != 0 && (adj_array[i].x != curr_x || next_pos.y != curr_y)) ||
+					 (game.level_array[next_pos.x][adj_array[i].y].id != -1 && game.level_array[next_pos.x][adj_array[i].y].id != 0 && (next_pos.x != curr_x || adj_array[i].y != curr_y)))){
+						break;//Don't perform a proximity check for this particular foe.
+					}
+				}
+			
+				var enemy_fine_x = adj_array[i].x*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
+				var enemy_fine_y = adj_array[i].y*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
+				
+				//var dist = Math.sqrt(Math.pow(fine_x-enemy_fine_x, 2) + Math.pow(fine_y-enemy_fine_y, 2));//Pythagoras
+				//dist <= 24+1//Not so good for this game
+				
+				if(Math.abs(fine_x-enemy_fine_x) <= 24 && Math.abs(fine_y-enemy_fine_y) <= 24){//Rectangular hit test.
+					game.play_sound(1);
+					game.wait_timer = LEV_STOP_DELAY*UPS;
+					game.level_ended = 2;
+					vis.update_all_animations();
+					return;
+				}
+			}
+		}
 	}
 
 	/*//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1071,10 +1096,11 @@ function CLASS_game(){
 	this.wait_timer = INTRO_DURATION*UPS;
 	this.paused = false;
 	
+	this.update_drawn = false;
 	this.mode = 0;//0 is entry, 1 is menu and play
 	this.level_number = 0;
 	this.level_array = new Array();
-	this.level_unlocked = 0;//DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	this.level_unlocked = 0;
 	this.level_ended = 0;//0 is not ended. 1 is won. 2 is died.
 	this.wow = true;//true is WOW!, false is Yeah!
 	
@@ -2173,6 +2199,9 @@ function CLASS_visual(){
 	this.dbx.lvlselect = null;
 	this.dbx.errfield = null;
 	
+	this.dbx.enterfun = null;
+	this.dbx.cancelfun = null;
+	
 	this.error_dbx = function(errno){
 		if(that.dbx.errfield === null) return;
 		var err_string = "";
@@ -2225,6 +2254,9 @@ function CLASS_visual(){
 					f_n = function(){that.open_dbx(DBX_LOAD);};
 				}
 				
+				that.dbx.enterfun = f_y;
+				that.dbx.cancelfun = f_c;
+				
 				add_button(183, 20, 100, f_y);//yes
 				add_button(179, 100, 100, f_n);//no
 				add_button(177, 180, 100, f_c);//cancel
@@ -2259,6 +2291,9 @@ function CLASS_visual(){
 					f_c = function(){that.open_dbx(DBX_LOAD);};
 				}
 				
+				that.dbx.enterfun = f_o;
+				that.dbx.cancelfun = f_c;
+				
 				add_button(181, 40, 160, f_o);//ok
 				add_button(177, 160, 160, f_c);//cancel
 				
@@ -2280,6 +2315,9 @@ function CLASS_visual(){
 				
 				var f_o = function(){if(game.dbxcall_load(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
 				var f_c = function(){that.close_dbx();};
+				
+				that.dbx.enterfun = f_o;
+				that.dbx.cancelfun = f_c;
 				
 				add_button(181, 40, 160, f_o);//ok
 				add_button(177, 160, 160, f_c);//cancel
@@ -2303,6 +2341,9 @@ function CLASS_visual(){
 				var f_o = function(){if(game.dbxcall_chpass(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
 				var f_c = function(){that.close_dbx();};
 				
+				that.dbx.enterfun = f_o;
+				that.dbx.cancelfun = f_c;
+				
 				add_button(181, 40, 160, f_o);//ok
 				add_button(177, 160, 160, f_c);//cancel
 				
@@ -2321,6 +2362,9 @@ function CLASS_visual(){
 				
 				var f_o = function(){game.load_level(parseInt(that.dbx.lvlselect.value));that.close_dbx();};
 				var f_c = function(){that.close_dbx();};
+				
+				that.dbx.enterfun = f_o;
+				that.dbx.cancelfun = f_c;
 				
 				add_button(181, 25, 220, f_o);//ok
 				add_button(177, 105, 220, f_c);//cancel
@@ -2375,6 +2419,10 @@ function CLASS_visual(){
 				}
 				
 				var f_o = function(){that.close_dbx();};
+				
+				that.dbx.enterfun = f_o;
+				that.dbx.cancelfun = f_o;
+				
 				add_button(181, 125, 300, f_o);//okay
 				break;
 			default:
@@ -2405,6 +2453,9 @@ function CLASS_visual(){
 		
 		that.dbx.lvlselect = null;
 		that.dbx.errfield = null;
+		
+		that.dbx.enterfun = null;
+		that.dbx.cancelfun = null;
 		
 		while (that.dbx.firstChild) {
 			that.dbx.removeChild(that.dbx.firstChild);
@@ -2449,6 +2500,8 @@ var update = function () {
 			}
 		}
 	}
+	game.update_drawn = false;
+	
 	var now = Date.now();
 	game.delta_updated = now - game.last_updated;
 	game.last_updated = now;
@@ -2495,6 +2548,12 @@ var render = function () {
 	//CTX.fillStyle="red";
 	//CTX.fillRect(0, 0, SCREEN_WIDTH, MENU_HEIGHT);
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
+	
+	if (game.update_drawn) {//This prevents the game from rendering the same thing twice.
+		window.requestAnimationFrame(render);
+		return;
+	}
+	game.update_drawn = true;
 
 	if (res.ready()) {
 		CTX.drawImage(res.images[0], 0, 0);//Background
