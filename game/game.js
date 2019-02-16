@@ -1,5 +1,5 @@
 "use strict";
-var DEBUG = true;
+var DEBUG = false;
 var AUTHOR = "Benjamin";
 
 //GLOBAL CONSTANTS
@@ -1203,6 +1203,10 @@ function CLASS_game(){
 	this.move_speed = Math.round(1*60/UPS);
 	this.door_removal_delay = Math.round(8*UPS/60);
 	
+	this.fpsInterval = 1000 / UPS;
+	this.then = Date.now();
+	this.now;
+	
 	this.initialized = false;
 	this.wait_timer = INTRO_DURATION*UPS;
 	this.paused = false;
@@ -2374,8 +2378,8 @@ function CLASS_visual(){
 			
 				that.dbx.style.width = "256px";
 				that.dbx.style.height = "154px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-154)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[173].src+')';
 				
 				var f_y;
@@ -2404,8 +2408,8 @@ function CLASS_visual(){
 			
 				that.dbx.style.width = "256px";
 				that.dbx.style.height = "213px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
 				
 				add_text("Player name:", 20, 35);
@@ -2440,8 +2444,8 @@ function CLASS_visual(){
 			
 				that.dbx.style.width = "256px";
 				that.dbx.style.height = "213px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
 				
 				add_text("Player name:", 20, 35);
@@ -2465,8 +2469,8 @@ function CLASS_visual(){
 			
 				that.dbx.style.width = "256px";
 				that.dbx.style.height = "213px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
 				
 				add_text("Old password:", 20, 35);
@@ -2490,13 +2494,13 @@ function CLASS_visual(){
 			
 				that.dbx.style.width = "197px";
 				that.dbx.style.height = "273px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-197)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-273)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[175].src+')';
 				
 				add_lvlselect(20, 80, 158, 109);
 				
-				var f_o = function(){game.load_level(parseInt(that.dbx.lvlselect.value));that.close_dbx();};
+				var f_o = function(){if(parseInt(that.dbx.lvlselect.value) > 0) {game.load_level(parseInt(that.dbx.lvlselect.value)); that.close_dbx();}};
 				var f_c = function(){that.close_dbx();};
 				
 				that.dbx.enterfun = f_o;
@@ -2523,8 +2527,8 @@ function CLASS_visual(){
 				
 				that.dbx.style.width = "322px";
 				that.dbx.style.height = "346px";
-				that.dbx.style.left = "50px";
-				that.dbx.style.top = "70px";
+				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-322)/2, 0)+"px";
+				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-346)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[176].src+')';
 				
 				var uc = localStorage.getItem("user_count");
@@ -2691,13 +2695,18 @@ var update_entities = function(){
 
 //Render scene
 var render = function () {
-	//update();//Put update into render function; assuming requestAnimationFrame runs @60Hz.
+	game.now = Date.now();
+    var elapsed = game.now - game.then;
+	if (elapsed > game.fpsInterval) {
+        game.then = game.now - (elapsed % game.fpsInterval);
+		update();
+	}
 	
 	//CTX.fillStyle="red";
 	//CTX.fillRect(0, 0, SCREEN_WIDTH, MENU_HEIGHT);
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
 	
-	if (game.update_drawn) {//This prevents the game from rendering the same thing twice (useless if update() in render function).
+	if (game.update_drawn) {//This prevents the game from rendering the same thing twice
 		window.requestAnimationFrame(render);
 		return;
 	}
@@ -3207,7 +3216,5 @@ function render_joystick(x, y){
             clearTimeout(id);
         };
 }());
-
-setInterval(update, 1000/UPS);//Update thread
 
 render();//Render thread
