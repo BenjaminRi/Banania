@@ -94,7 +94,7 @@ if(IS_TOUCH_DEVICE){
 		var rect = CANVAS.getBoundingClientRect();
 		var style = window.getComputedStyle(CANVAS);
 		CANVAS.true_width = rect.width + parseInt(style.getPropertyValue('border-left-width')) +parseInt(style.getPropertyValue('border-right-width'));
-		CANVAS.true_height = rect.height + parseInt(style.getPropertyValue('border-top-width')) +parseInt(style.getPropertyValue('border-top-width'));
+		CANVAS.true_height = rect.height + parseInt(style.getPropertyValue('border-top-width')) +parseInt(style.getPropertyValue('border-bottom-width'));
 		
 			
 		var mindim = Math.min(window.innerWidth, window.innerHeight);
