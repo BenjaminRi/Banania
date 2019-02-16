@@ -13,14 +13,13 @@ var LEV_OFFSET_Y = 79;
 var LEV_DIMENSION_X = 21;
 var LEV_DIMENSION_Y = 13;
 var MENU_HEIGHT = 20;
-var INTRO_DURATION = 2;//In seconds
-if(!DEBUG) INTRO_DURATION = 6;
-var LEV_START_DELAY = 1;
-if(!DEBUG) LEV_START_DELAY = 2;
-var LEV_STOP_DELAY = 1;
-if(!DEBUG) LEV_STOP_DELAY = 2;
-var ANIMATION_SPEED = 4;//How many times the game has to update before the image changes
-var MOTION_THRESHOLD = 5;
+var INTRO_DURATION = 6;//In seconds
+if(DEBUG) INTRO_DURATION = 2;
+var LEV_START_DELAY = 2;
+if(DEBUG) LEV_START_DELAY = 1;
+var LEV_STOP_DELAY = 2;
+if(DEBUG) LEV_STOP_DELAY = 1;
+var ANIMATION_DURATION = 4;//How many times the game has to render before the image changes
 
 var DEFAULT_VOLUME = 0.7;
 
@@ -56,7 +55,7 @@ var CANVAS = document.createElement("canvas");
 var CTX = CANVAS.getContext("2d");
 CANVAS.width = SCREEN_WIDTH;
 CANVAS.height = SCREEN_HEIGHT;
-CANVAS.style.border = "1px solid #000000";
+CANVAS.className = "canv";
 document.body.appendChild(CANVAS);
 
 //GLOBAL VARIABLES
@@ -253,42 +252,26 @@ function CLASS_resources(){
 		////////////////////////////////////////////////////////
 		// Sounds: /////////////////////////////////////////////
 		////////////////////////////////////////////////////////
-
-		that.sounds[0] = new Audio(SOUND_DIR+"about.wav");
-		that.sounds[0].onloadeddata = on_loaded();
-
-		that.sounds[1] = new Audio(SOUND_DIR+"argl.wav");
-		that.sounds[1].onloadeddata = on_loaded();
-
-		that.sounds[2] = new Audio(SOUND_DIR+"attack1.wav");
-		that.sounds[2].onloadeddata = on_loaded();
-
-		that.sounds[3] = new Audio(SOUND_DIR+"attack2.wav");
-		that.sounds[3].onloadeddata = on_loaded();
-
-		that.sounds[4] = new Audio(SOUND_DIR+"chart.wav");
-		that.sounds[4].onloadeddata = on_loaded();
-
-		that.sounds[5] = new Audio(SOUND_DIR+"click.wav");
-		that.sounds[5].onloadeddata = on_loaded();
-
-		that.sounds[6] = new Audio(SOUND_DIR+"gameend.wav");
-		that.sounds[6].onloadeddata = on_loaded();
-
-		that.sounds[7] = new Audio(SOUND_DIR+"getpoint.wav");
-		that.sounds[7].onloadeddata = on_loaded();
-
-		that.sounds[8] = new Audio(SOUND_DIR+"newplane.wav");
-		that.sounds[8].onloadeddata = on_loaded();
-
-		that.sounds[9] = new Audio(SOUND_DIR+"opendoor.wav");
-		that.sounds[9].onloadeddata = on_loaded();
-
-		that.sounds[10] = new Audio(SOUND_DIR+"wow.wav");
-		that.sounds[10].onloadeddata = on_loaded();
-
-		that.sounds[11] = new Audio(SOUND_DIR+"yeah.wav");
-		that.sounds[11].onloadeddata = on_loaded();
+		
+		var soundarray = [
+		"about.wav",
+		"argl.wav",
+		"attack1.wav",
+		"attack2.wav",
+		"chart.wav",
+		"click.wav",
+		"gameend.wav",
+		"getpoint.wav",
+		"newplane.wav",
+		"opendoor.wav",
+		"wow.wav",
+		"yeah.wav"];
+		
+		for(var i = 0; i < soundarray.length; i++){
+			that.sounds[i] = new Audio();
+			that.sounds[i].onloadeddata = on_loaded();
+			that.sounds[i].src = SOUND_DIR+soundarray[i];
+		}
 
 		////////////////////////////////////////////////////////
 		// Level: //////////////////////////////////////////////
@@ -449,7 +432,7 @@ function CLASS_input(){
 		if(that.menu_pressed == 0 && that.lastklick_option !== null && !that.lastklick_option.line){
 			var up_option = calc_option(vis.menu1, that.mouse_pos.x, that.mouse_pos.y);
 			if(up_option === that.lastklick_option && that.lastklick_option.on()){
-				switch(that.lastklick_option.effect_id){//THIS DOESNT WORK LIKE THAT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				switch(that.lastklick_option.effect_id){
 					case 0:
 						if(game.savegame.progressed){
 							vis.open_dbx(DBX_CONFIRM, 0);
@@ -553,11 +536,6 @@ function CLASS_input(){
 		return null;
 	}
 	
-	function handle_device_orientation(event){
-		that.last_orientation.gamma = event.gamma;
-		that.last_orientation.beta = event.beta;
-	}
-	
 //Public:
 	this.keys_down = new Array();
 	this.mouse_pos = {x: 0, y: 0};
@@ -567,11 +545,8 @@ function CLASS_input(){
 	this.lastclick_button = -1;
 	this.menu_pressed = -1;
 	this.lastklick_option = null;
-	this.last_orientation = {};
 	
 	this.init = function(){
-		//Mobile motion detector!
-		window.addEventListener('deviceorientation', handle_device_orientation, false);
 	
 		// Handle keyboard controls (GLOBAL)
 		document.addEventListener('keydown', handle_keydown_global, false);
@@ -894,7 +869,7 @@ function CLASS_game(){
 				}
 			}
 			
-			if(closest_berti == -1){//Can't see berti; Random search
+			if(closest_berti == -1 || Math.random() < 0.02){//Can't see berti OR he randomly gets distracted THEN Random search
 				this.sees_berti = false;
 				this.move_randomly(curr_x, curr_y);
 			}else{//Chasing code here.
@@ -1028,58 +1003,27 @@ function CLASS_game(){
 	}
 	
 	CLASS_entity.prototype.register_input = function(curr_x, curr_y){
-		var motionsensor_dir = DIR_NONE;
-	
-		if(input.last_orientation.gamma && input.last_orientation.beta){//If the motion sensors are active, then
-			if(Math.abs(input.last_orientation.gamma) >= MOTION_THRESHOLD){
-				if(Math.abs(input.last_orientation.beta) >= MOTION_THRESHOLD){
-					var first_choice;
-					var second_choice;
-					if(Math.abs(input.last_orientation.gamma) > Math.abs(input.last_orientation.beta)){
-						first_choice = input.last_orientation.gamma > 0 ? DIR_RIGHT : DIR_LEFT;
-						second_choice = input.last_orientation.beta > 0 ? DIR_DOWN : DIR_UP;
-					}else{
-						first_choice = input.last_orientation.beta > 0 ? DIR_DOWN : DIR_UP;
-						second_choice = input.last_orientation.gamma > 0 ? DIR_RIGHT : DIR_LEFT;
-					}
-					if(game.walkable(curr_x, curr_y, first_choice)){
-						motionsensor_dir = first_choice;
-					}else{
-						motionsensor_dir = second_choice;
-					}
-				}else{
-					motionsensor_dir = input.last_orientation.gamma > 0 ? DIR_RIGHT : DIR_LEFT;
-				}
-			}else{
-				if(Math.abs(input.last_orientation.beta) >= MOTION_THRESHOLD){
-					motionsensor_dir = input.last_orientation.beta > 0 ? DIR_DOWN : DIR_UP;
-				}else{
-					motionsensor_dir = DIR_NONE;
-				}
-			}
-		}
-	
 		if(!this.moving){
-			if(input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT) || motionsensor_dir == DIR_LEFT){
+			if(input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
 				if(game.walkable(curr_x, curr_y, DIR_LEFT)){
 					game.start_move(curr_x, curr_y, DIR_LEFT);
 				}
-			}else if(input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP) || motionsensor_dir == DIR_UP){
+			}else if(input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
 				if(game.walkable(curr_x, curr_y, DIR_UP)){
 					game.start_move(curr_x, curr_y, DIR_UP);
 				}
-			}else if(input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT) || motionsensor_dir == DIR_RIGHT){
+			}else if(input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
 				if(game.walkable(curr_x, curr_y, DIR_RIGHT)){
 					game.start_move(curr_x, curr_y, DIR_RIGHT);
 				}
-			}else if(input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN) || motionsensor_dir == DIR_DOWN){
+			}else if(input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
 				if(game.walkable(curr_x, curr_y, DIR_DOWN)){
 					game.start_move(curr_x, curr_y, DIR_DOWN);
 				}
 			}
 		}
 	}
-	//After each update, this function gets called for (every) Berti to see if he's gotten caught!
+	//After each update, this function gets called for (every) Berti to see if he was caught!
 	CLASS_entity.prototype.check_enemy_proximity = function(curr_x, curr_y){
 		var fine_x = curr_x*24 + this.moving_offset.x;
 		var fine_y = curr_y*24 + this.moving_offset.y;
@@ -2521,17 +2465,17 @@ function CLASS_visual(){
 	}
 	
 }
-
+var TIMINGARRAY = new Array();
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
 //UPDATING PROCESS
 //Here, the behaviour of the game is calculated, once per UPS (update per second)
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 var update = function () {
-	if(res.ready()){
+	if(res.ready()){//All resources loaded
 		if(!game.initialized){
 			game.set_volume(DEFAULT_VOLUME);
-			input.init();//Only init inputs after everything is initialized.
+			input.init();//Only init inputs after everything is loaded.
 			game.play_sound(0);
 			game.initialized = true;
 		}
@@ -2558,20 +2502,27 @@ var update = function () {
 			}
 		}
 	}
-	game.update_drawn = false;
 	
 	var now = Date.now();
 	game.delta_updated = now - game.last_updated;
+	if(TIMINGARRAY.length < 20 && game.delta_updated > 20)
+	TIMINGARRAY.push(game.delta_updated);
 	game.last_updated = now;
+	
+	game.update_drawn = false;
 };
 
 var update_entities = function(){
 
+	//The player moves first at all times to ensure the best response time and remove directional quirks.
+	for(var i = 0; i < game.berti_positions.length; i++){
+		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].register_input(game.berti_positions[i].x, game.berti_positions[i].y);
+	}
+
+	//NPC logic and stop walking logic.
 	for(var y = 0; y < LEV_DIMENSION_Y; y++){
 		for(var x = 0; x < LEV_DIMENSION_X; x++){
-			if(game.level_array[x][y].id == 1){//Berti
-				game.level_array[x][y].register_input(x,y);
-			}else if(game.level_array[x][y].id == 2){//MENU Berti
+			if(game.level_array[x][y].id == 2){//MENU Berti
 				game.level_array[x][y].move_randomly(x,y);
 			}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){//Purple and green monster
 				game.level_array[x][y].chase_berti(x,y);
@@ -2583,13 +2534,15 @@ var update_entities = function(){
 			}
 		}
 	}
-	
+
+	//After calculating who moves where, the entities actually get updated.
 	for(var y = 0; y < LEV_DIMENSION_Y; y++){
 		for(var x = 0; x < LEV_DIMENSION_X; x++){
 			game.level_array[x][y].update_entity(x,y);
 		}
 	}
 	
+	//Gameover condition check.
 	for(var i = 0; i < game.berti_positions.length; i++){
 		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].check_enemy_proximity(game.berti_positions[i].x, game.berti_positions[i].y);
 	}
@@ -2608,6 +2561,7 @@ var render = function () {
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
 	
 	if (game.update_drawn) {//This prevents the game from rendering the same thing twice.
+		//game.update_drawn = false;
 		window.requestAnimationFrame(render);
 		return;
 	}
@@ -2838,8 +2792,8 @@ function render_block(x, y, render_option){
 	var offset_y = block.moving_offset.y;
 	
 	var needs_update = false;
-	while(block.animation_delay >= ANIMATION_SPEED && !block.just_moved){
-		block.animation_delay -= ANIMATION_SPEED;
+	while(block.animation_delay >= ANIMATION_DURATION && !block.just_moved){
+		block.animation_delay -= ANIMATION_DURATION;
 		needs_update = true;
 	}
 	
@@ -3081,8 +3035,6 @@ function render_displays(){
         };
 }());
 
-setInterval(function() {
-  update();
-}, 1000/UPS);//Update thread
+setInterval(update, 1000/UPS);//Update thread
 
 window.requestAnimationFrame(render);//Render thread
