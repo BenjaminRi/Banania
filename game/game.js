@@ -1,7 +1,7 @@
 "use strict";
 
 //GLOBAL CONSTANTS
-var UPS = 15;
+var UPS = 30;
 var NUM_RESOURCES = 197;
 var IMAGE_DIR = "images/";
 var SOUND_DIR = "sound/";
@@ -15,9 +15,9 @@ var MENU_HEIGHT = 20;
 var INTRO_DURATION = 2;//6;//In seconds
 var LEV_START_DELAY = 1;//2;
 var LEV_STOP_DELAY = 1//2;
-var ANIMATION_SPEED = 2;//How many times the game has to update before the image changes
+var ANIMATION_SPEED = 4;//How many times the game has to update before the image changes
 
-var DEFAULT_VOLUME = 0.5;
+var DEFAULT_VOLUME = 0.7;
 
 var DIR_NONE = -1;
 var DIR_UP = 0;
@@ -35,6 +35,13 @@ var DBX_LOAD = 2;
 var DBX_CHPASS = 3;
 var DBX_LOADLVL = 4;
 var DBX_CHARTS = 5;
+
+var ERR_SUCCESS = 0;
+var ERR_EXISTS = 1;
+var ERR_NOSAVE = 2;
+var ERR_WRONGPW = 3;
+var ERR_NOTFOUND = 4;
+var ERR_EMPTYNAME = 5;
 
 //Check storage
 var HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null;} catch (e) {return false;}})();
@@ -428,20 +435,28 @@ function CLASS_input(){
 		
 		if(that.menu_pressed == 0 && that.lastklick_option !== null && !that.lastklick_option.line){
 			var up_option = calc_option(vis.menu1, that.mouse_pos.x, that.mouse_pos.y);
-			if(up_option === that.lastklick_option && that.lastklick_option.on){
+			if(up_option === that.lastklick_option && that.lastklick_option.on()){
 				switch(that.lastklick_option.effect_id){//THIS DOESNT WORK LIKE THAT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					case 0:
 						if(game.savegame.progressed){
-							vis.open_dbx(DBX_CONFIRM);
+							vis.open_dbx(DBX_CONFIRM, 0);
 						}else{
 							game.clear_savegame();
 						}
 						break;
 					case 1:
-						vis.open_dbx(DBX_LOAD);
+						if(game.savegame.progressed){
+							vis.open_dbx(DBX_CONFIRM, 1);
+						}else{
+							vis.open_dbx(DBX_LOAD);
+						}
 						break;
 					case 2:
-						vis.open_dbx(DBX_SAVE);
+						if(game.savegame.username !== null){
+							game.store_savegame();
+						}else{
+							vis.open_dbx(DBX_SAVE);
+						}
 						break;
 					case 3:
 						game.toggle_paused();
@@ -588,7 +603,8 @@ function CLASS_game(){
 	
 	this.clear_savegame = function(){
 		this.savegame = new CLASS_savegame();
-		game.load_level(1);
+		that.level_unlocked = 1;
+		that.load_level(that.level_unlocked);
 	}
 	
 	this.update_savegame = function(lev, steps){
@@ -618,16 +634,18 @@ function CLASS_game(){
 		localStorage.setItem(prefix+"reached_level", that.savegame.reached_level);
 		
 		for(var i = 1; i <= 50; i++){
-			localStorage.setItem(prefix+"steps_lv"+i, arr_steps[i]);
+			localStorage.setItem(prefix+"steps_lv"+i, that.savegame.arr_steps[i]);
 		}
 		
 		that.savegame.progressed = false;
+		
+		return ERR_SUCCESS;//Success!
 	}
 	
 	this.retrieve_savegame = function(uname, pass){
 		var user_count = localStorage.getItem("user_count");
 		if(user_count === null){
-			return;//There are no save games
+			return ERR_NOSAVE;//There are no save games
 		}
 		user_count = parseInt(user_count);
 		pass = md5.digest(pass);
@@ -645,13 +663,21 @@ function CLASS_game(){
 						that.savegame.arr_steps[i] = parseInt(localStorage.getItem(prefix+"steps_lv"+i));
 					}
 					that.savegame.progressed = false;
-					return;//Success!
+					
+					that.level_unlocked = that.savegame.reached_level;
+					if(that.level_unlocked >= 50){
+						that.load_level(50);
+					}else{
+						that.load_level(that.level_unlocked);
+					}
+					
+					return ERR_SUCCESS;//Success!
 				}else{
-					return;//Wrong password!
+					return ERR_WRONGPW;//Wrong password!
 				}
 			}
 		}
-		return;//There's no such name
+		return ERR_NOTFOUND;//There's no such name
 	}
 	
 	this.name_savegame = function(uname, pass){
@@ -661,22 +687,73 @@ function CLASS_game(){
 			for(var i = 0; i < user_count; i++){
 				var prefix = "player"+i+"_";
 				if(localStorage.getItem(prefix+"username") == uname){
-					return;//Failed already exists
+					return ERR_EXISTS;//Failed already exists
 				}
 			}	
 		}
 		that.savegame.username = uname;
 		that.savegame.password = md5.digest(pass)
-		return;//Worked
+		return ERR_SUCCESS;//Worked
 	}
 	
 	this.change_password = function(pass, newpass){
 		pass = md5.digest(pass);
-		if(that.savegame.password == pass){
+		if(that.savegame.password === pass){
 			that.savegame.password = md5.digest(newpass);
-			return;//Worked
+			localStorage.setItem("player"+that.savegame.usernumber+"_password", that.savegame.password);
+			return ERR_SUCCESS;//Worked
 		}
-		return;//Wrong pass
+		return ERR_WRONGPW;//Wrong pass
+	}
+	
+	//Those calls are on a higher abstraction levels and can be safely used by dialog boxes:
+	this.dbxcall_save = function(uname, pass){
+		var result;
+		if(uname === null || uname == "") {
+			vis.error_dbx(ERR_EMPTYNAME);
+			return false;
+		}
+		
+		if(that.savegame.username === null){
+			result = that.name_savegame(uname, pass);
+			if(result != ERR_SUCCESS){
+				vis.error_dbx(result);
+				return false;
+			}
+		}
+		
+		result = that.store_savegame();
+		if(result != ERR_SUCCESS){
+			vis.error_dbx(result);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	this.dbxcall_load = function(uname, pass){
+		if(uname === null || uname == "") {
+			vis.error_dbx(ERR_EMPTYNAME);
+			return false;
+		}
+		
+		var result = that.retrieve_savegame(uname, pass);
+		if(result != ERR_SUCCESS){
+			vis.error_dbx(result);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	this.dbxcall_chpass = function(pass, newpass){
+		var result = that.change_password(pass, newpass);
+		if(result != ERR_SUCCESS){
+			vis.error_dbx(result);
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/*//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,7 +1064,7 @@ function CLASS_game(){
 	//GAME CLASS
 	//Core engine, entity class, game ending criteria and much more
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
-	this.move_speed = 4;
+	this.move_speed = 2;
 	this.door_removal_delay = 4;
 	
 	this.initialized = false;
@@ -1019,6 +1096,8 @@ function CLASS_game(){
 	this.sound = false;
 	
 	this.load_level = function(lev_number){
+		that.mode = 1;
+	
 		that.steps_taken = 0;
 		that.num_bananas = 0;
 		that.level_ended = 0;
@@ -1116,7 +1195,9 @@ function CLASS_game(){
 		that.level_array[src_x][src_y].face_dir = dir;
 		
 		if(that.level_array[src_x][src_y].id == 1){
-			that.steps_taken++;
+			if(that.steps_taken < 99999){
+				that.steps_taken++;
+			}
 		}
 		
 		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable){
@@ -1448,7 +1529,15 @@ function CLASS_game(){
 		}
 	}
 	
-	this.next_level = function(){//DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	this.next_level = function(){
+		if(that.level_number >= 50 || that.level_number < 0){
+			game.mode = 2;
+			game.steps_taken = 0;
+			game.play_sound(6);
+			that.buttons_activated[0] = false;
+			that.buttons_activated[2] = false;
+			return;
+		}
 		that.load_level(that.level_number+1);//Prevent overflow here
 		if(that.level_number > that.level_unlocked){
 			that.level_unlocked = that.level_number;
@@ -1457,7 +1546,6 @@ function CLASS_game(){
 	
 	this.reset_level = function(){
 		if(that.mode == 0){
-			that.mode = 1;
 			that.load_level(0);
 		}else if(that.mode == 1){
 			if(that.level_number == 0){
@@ -1931,21 +2019,23 @@ function CLASS_visual(){
 	this.menu1;
 
 	this.init_menus = function(){
+		var tautology = function(){return true;};
+	
 		var arr_options1 = [
-		{line:false, check:0, name:"New", hotkey:"F2", effect_id:0, on:true},
-		{line:false, check:0, name:"Load Game...", hotkey:"", effect_id:1, on:true},
-		{line:false, check:0, name:"Save", hotkey:"", effect_id:2, on:true},
-		{line:false, check:1, name:"Pause", hotkey:"", effect_id:3, on:true}
+		{line:false, check:0, name:"New", hotkey:"F2", effect_id:0, on:tautology},
+		{line:false, check:0, name:"Load Game...", hotkey:"", effect_id:1, on:function(){return HAS_STORAGE;}},
+		{line:false, check:0, name:"Save", hotkey:"", effect_id:2, on:function(){return (game.savegame.progressed && HAS_STORAGE);}},
+		{line:false, check:1, name:"Pause", hotkey:"", effect_id:3, on:tautology}
 		];
 		
 		var arr_options2 = [
-		{line:false, check:1, name:"Single steps", hotkey:"F5", effect_id:4, on:true},
-		{line:false, check:1, name:"Sound", hotkey:"", effect_id:5, on:true},
-		{line:true, check:0, name:"", hotkey:"", effect_id:-1, on:true},
-		{line:false, check:0, name:"Load Level", hotkey:"", effect_id:6, on:true},
-		{line:false, check:0, name:"Change Password", hotkey:"", effect_id:7, on:true},
-		{line:true, check:0, name:"", hotkey:"", effect_id:-1, on:true},
-		{line:false, check:0, name:"Charts (offline)", hotkey:"", effect_id:8, on:true}
+		{line:false, check:1, name:"Single steps", hotkey:"F5", effect_id:4, on:tautology},
+		{line:false, check:1, name:"Sound", hotkey:"", effect_id:5, on:tautology},
+		{line:true, check:0, name:"", hotkey:"", effect_id:-1, on:tautology},
+		{line:false, check:0, name:"Load Level", hotkey:"", effect_id:6, on:function(){return HAS_STORAGE;}},
+		{line:false, check:0, name:"Change Password", hotkey:"", effect_id:7, on:function(){return (game.savegame.username !== null && HAS_STORAGE);}},
+		{line:true, check:0, name:"", hotkey:"", effect_id:-1, on:tautology},
+		{line:false, check:0, name:"Charts", hotkey:"", effect_id:8, on:function(){return HAS_STORAGE;}}
 		];
 		
 		var sub_m1 = new CLASS_submenu(43, 100, "Game", arr_options1);
@@ -1987,6 +2077,20 @@ function CLASS_visual(){
 		that.dbx.appendChild(txt);
 	}
 	
+	function add_number(a_num, pos_x, pos_y, width, height){
+		var num = document.createElement("p");
+		num.innerHTML = a_num;
+		num.style.position = "absolute";
+		num.style.left = pos_x+"px";
+		num.style.top = pos_y+"px";
+		num.style.width = width+"px";
+		num.style.height = height+"px";
+		num.style.fontFamily = "Tahoma";
+		num.style.fontSize = "12px";
+		num.style.textAlign = "right";
+		that.dbx.appendChild(num);
+	}
+	
 	function add_title(text){
 		var txt = document.createElement("p");
 		txt.innerHTML = text;
@@ -2025,7 +2129,9 @@ function CLASS_visual(){
 		for(var i = 1; i < game.savegame.reached_level; i++){
 			select.innerHTML += "<option value=\""+i+"\">\n"+i+", "+game.savegame.arr_steps[i]+"</option>";
 		}
-		select.innerHTML += "<option value=\""+game.savegame.reached_level+"\">\n"+game.savegame.reached_level+", -</option>";
+		if(game.savegame.reached_level <= 50){
+			select.innerHTML += "<option value=\""+game.savegame.reached_level+"\">\n"+game.savegame.reached_level+", -</option>";
+		}
 		
 		
 		select.style.position = "absolute";
@@ -2040,6 +2146,20 @@ function CLASS_visual(){
 		that.dbx.lvlselect = select;
 	}
 	
+	function add_errfield(pos_x, pos_y){
+		var ef = document.createElement("p");
+		ef.innerHTML = "";
+		ef.style.position = "absolute";
+		ef.style.left = pos_x+"px";
+		ef.style.top = pos_y+"px";
+		ef.style.fontFamily = "Tahoma";
+		ef.style.fontSize = "12px";
+		ef.style.color = "#FF0000";
+		that.dbx.appendChild(ef);
+		
+		that.dbx.errfield = ef;
+	}
+	
 	this.dbx = document.createElement("div");
 	this.dbx.style.position = "fixed";
 	this.dbx.style.zIndex = 100;
@@ -2051,9 +2171,37 @@ function CLASS_visual(){
 	this.dbx.arr_btn = new Array();
 	this.dbx.arr_input = new Array();
 	this.dbx.lvlselect = null;
+	this.dbx.errfield = null;
 	
-	this.open_dbx = function(dbx_id){
+	this.error_dbx = function(errno){
+		if(that.dbx.errfield === null) return;
+		var err_string = "";
+		switch(errno){
+			case ERR_EXISTS:
+				err_string = "Error - the account already exists.";
+				break;
+			case ERR_NOSAVE:
+				err_string = "Error - there are no savegames to load!";
+				break;
+			case ERR_WRONGPW:
+				err_string = "Error - you used the wrong password.";
+				break;
+			case ERR_NOTFOUND:
+				err_string = "Error - this username couldn't be found.";
+				break;
+			case ERR_EMPTYNAME:
+				err_string = "Error - please fill in your name.";
+				break;
+			default:
+				err_string = "Unknown error";
+				break;
+		}
+		that.dbx.errfield.innerHTML = err_string;
+	}
+	
+	this.open_dbx = function(dbx_id, opt){
 		that.close_dbx();
+		opt = (typeof opt !== 'undefined') ? opt : 0;
 	
 		switch(dbx_id){
 			case DBX_CONFIRM:
@@ -2064,11 +2212,22 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[173].src+')';
-				add_button(183, 20, 100, function(){for(var i = 0; i < 1000; i++){that.close_dbx();that.open_dbx(DBX_CONFIRM);}});
-				add_button(179, 100, 100, 3);
-				add_button(177, 180, 100, 3);
 				
-				//add_input(50, 50, 100, 30);
+				var f_y;
+				var f_n;
+				var f_c = function(){that.close_dbx();};
+				
+				if(opt == 0){//"New Game"
+					f_y = function(){that.open_dbx(DBX_SAVE, 1);};
+					f_n = function(){game.clear_savegame();that.close_dbx();};
+				}else if(opt == 1){//"Load Game" 
+					f_y = function(){that.open_dbx(DBX_SAVE, 2);};
+					f_n = function(){that.open_dbx(DBX_LOAD);};
+				}
+				
+				add_button(183, 20, 100, f_y);//yes
+				add_button(179, 100, 100, f_n);//no
+				add_button(177, 180, 100, f_c);//cancel
 				
 				add_text("Do you want to save the game?", 40, 35);
 				break;
@@ -2080,13 +2239,30 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
-				add_button(181, 40, 160, function(){for(var i = 0; i < 1000; i++){that.close_dbx();that.open_dbx(DBX_SAVE);}});
-				add_button(177, 160, 160, 3);
 				
 				add_text("Player name:", 20, 35);
 				add_input(100, 35, 120, 15, "text");
 				add_text("Password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
+				
+				var f_o;
+				var f_c;
+				
+				if(opt == 0){//"Save game"
+					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
+					f_c = function(){that.close_dbx();};
+				}else if(opt == 1){//"New Game" -> yes, save 
+					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){game.clear_savegame();that.close_dbx();}};
+					f_c = function(){game.clear_savegame();that.close_dbx();};
+				}else if(opt == 2){//"Load Game" -> yes, save
+					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.open_dbx(DBX_LOAD);}};
+					f_c = function(){that.open_dbx(DBX_LOAD);};
+				}
+				
+				add_button(181, 40, 160, f_o);//ok
+				add_button(177, 160, 160, f_c);//cancel
+				
+				add_errfield(20, 85);
 				break;
 			case DBX_LOAD:
 				add_title("Load game");
@@ -2096,13 +2272,19 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
-				add_button(181, 40, 160, function(){for(var i = 0; i < 1000; i++){that.close_dbx();that.open_dbx(DBX_LOAD);}});
-				add_button(177, 160, 160, 3);
 				
 				add_text("Player name:", 20, 35);
 				add_input(100, 35, 120, 15, "text");
 				add_text("Password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
+				
+				var f_o = function(){if(game.dbxcall_load(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
+				var f_c = function(){that.close_dbx();};
+				
+				add_button(181, 40, 160, f_o);//ok
+				add_button(177, 160, 160, f_c);//cancel
+				
+				add_errfield(20, 85);
 				break;
 			case DBX_CHPASS:
 				add_title("Change password");
@@ -2112,13 +2294,19 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[174].src+')';
-				add_button(181, 40, 160, function(){for(var i = 0; i < 1000; i++){that.close_dbx();that.open_dbx(DBX_LOAD);}});
-				add_button(177, 160, 160, 3);
 				
 				add_text("Old password:", 20, 35);
-				add_input(100, 35, 120, 15, "text");
+				add_input(100, 35, 120, 15, "password");
 				add_text("New password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
+				
+				var f_o = function(){if(game.dbxcall_chpass(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
+				var f_c = function(){that.close_dbx();};
+				
+				add_button(181, 40, 160, f_o);//ok
+				add_button(177, 160, 160, f_c);//cancel
+				
+				add_errfield(20, 85);
 				break;
 			case DBX_LOADLVL:
 				add_title("Load level");
@@ -2128,16 +2316,29 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[175].src+')';
-				add_button(181, 25, 220, function(){for(var i = 0; i < 1000; i++){that.close_dbx();that.open_dbx(DBX_LOADLVL);}});
-				add_button(177, 105, 220, 3);
-				
-				add_text("Player name:", 20, 30);
-				add_text("Level, steps:", 20, 50);
 				
 				add_lvlselect(20, 80, 158, 109);
 				
+				var f_o = function(){game.load_level(parseInt(that.dbx.lvlselect.value));that.close_dbx();};
+				var f_c = function(){that.close_dbx();};
+				
+				add_button(181, 25, 220, f_o);//ok
+				add_button(177, 105, 220, f_c);//cancel
+				
+				add_text("Player name:", 20, 30);
+				if(game.savegame.username === null){
+					add_text("- none -", 100, 30);
+				}else{
+					add_text(game.savegame.username, 100, 30);
+				}
+				
+				add_text("Level, steps:", 20, 50);
+				
+				
 				break;
 			case DBX_CHARTS:
+				game.play_sound(4);
+				
 				add_title("Charts");
 				
 				that.dbx.style.width = "322px";
@@ -2145,6 +2346,36 @@ function CLASS_visual(){
 				that.dbx.style.left = "50px";
 				that.dbx.style.top = "70px";
 				that.dbx.style.background = 'url('+res.images[176].src+')';
+				
+				var uc = localStorage.getItem("user_count");
+				var user_arr = new Array();
+				
+				for(var i = 0; i < uc; i++){
+					var prefix = "player"+i+"_";
+					var rl = parseInt(localStorage.getItem(prefix+"reached_level"));
+					var st = 0;
+					for(var j = 1; j < rl; j++){
+						st += parseInt(localStorage.getItem(prefix+"steps_lv"+j));
+					}
+					user_arr[i] = {name: localStorage.getItem(prefix+"username"), reached: rl, steps: st}
+				}
+				
+				user_arr.sort(function(a,b){return (b.reached-a.reached == 0)?(a.steps - b.steps):(b.reached-a.reached);});
+				
+				add_text("rank", 21, 37);
+				add_text("level", 57, 37);
+				add_text("steps", 100, 37);
+				add_text("name", 150, 37);
+				
+				for(var i = 0; i < uc && i < 10; i++){
+					add_number((i+1), 20, 65+18*i, 20, 20);
+					add_number(user_arr[i].reached, 50, 65+18*i, 30, 20);
+					add_number(user_arr[i].steps, 95, 65+18*i, 40, 20);
+					add_text(user_arr[i].name, 155, 65+18*i);
+				}
+				
+				var f_o = function(){that.close_dbx();};
+				add_button(181, 125, 300, f_o);//okay
 				break;
 			default:
 				break;
@@ -2173,6 +2404,7 @@ function CLASS_visual(){
 		that.dbx.arr_input = new Array();
 		
 		that.dbx.lvlselect = null;
+		that.dbx.errfield = null;
 		
 		while (that.dbx.firstChild) {
 			that.dbx.removeChild(that.dbx.firstChild);
@@ -2200,7 +2432,6 @@ var update = function () {
 				game.wait_timer--;
 				if(game.wait_timer <= 0){
 					game.load_level(0);
-					game.mode = 1;
 				}
 			}else if(game.mode == 1){
 				if(game.wait_timer <= 0){
@@ -2275,6 +2506,8 @@ var render = function () {
 			CTX.drawImage(res.images[1], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 		}else if(game.mode == 1){
 			render_field();
+		}else if(game.mode == 2){
+			CTX.drawImage(res.images[170], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 		}
 		render_vol_bar();
 		render_menu();
@@ -2368,14 +2601,14 @@ function render_menu(){
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 					
 					check_image = 172;
-				}else if(!sm.options[j].on){
+				}else if(!sm.options[j].on()){
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 					CTX.fillText(sm.options[j].name, vis.menu1.offset_x + submenu_offset + 21, option_offset + 2);
 				}else{
 					CTX.fillStyle = "rgb("+vis.black.r+", "+vis.black.g+", "+vis.black.b+")";
 				}
 				
-				if(sm.options[j].on){
+				if(sm.options[j].on()){
 					CTX.fillText(sm.options[j].name, vis.menu1.offset_x + submenu_offset + 20, option_offset + 1);
 				}else{
 					CTX.fillStyle = "rgb("+vis.med_grey.r+", "+vis.med_grey.g+", "+vis.med_grey.b+")";
