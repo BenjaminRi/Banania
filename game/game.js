@@ -3,7 +3,7 @@ var DEBUG = true;
 var AUTHOR = "Benjamin";
 
 //GLOBAL CONSTANTS
-var UPS = 30;
+var UPS = 60;
 var NUM_RESOURCES = 197;
 var IMAGE_DIR = "images/";
 var SOUND_DIR = "sound/";
@@ -33,6 +33,7 @@ var DIR_RIGHT = 3;
 var RENDER_FULL = 0;
 var RENDER_TOP = 1;
 var RENDER_BOTTOM = 2;
+var RENDER_BOTTOM_BORDER = 3;
 
 var DBX_CONFIRM = 0;
 var DBX_SAVE = 1;
@@ -48,6 +49,9 @@ var ERR_WRONGPW = 3;
 var ERR_NOTFOUND = 4;
 var ERR_EMPTYNAME = 5;
 
+var JOYSTICK_SIZE = 0.4;//In terms of the smaller of the two screen dimensions
+var IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+
 //Check storage
 var HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
 
@@ -56,8 +60,49 @@ var CANVAS = document.createElement("canvas");
 var CTX = CANVAS.getContext("2d");
 CANVAS.width = SCREEN_WIDTH;
 CANVAS.height = SCREEN_HEIGHT;
+CANVAS.true_width = SCREEN_WIDTH;
+CANVAS.true_height = SCREEN_HEIGHT;
 CANVAS.className = "canv";
 document.body.appendChild(CANVAS);
+
+var JOYSTICK;
+var JOYCTX;
+if(IS_TOUCH_DEVICE){
+	//Joystick creation
+	JOYSTICK = document.createElement("canvas");
+	JOYCTX = JOYSTICK.getContext("2d");
+	var mindim = Math.min(window.innerWidth, window.innerHeight);
+	JOYSTICK.width = mindim*JOYSTICK_SIZE;
+	JOYSTICK.height = mindim*JOYSTICK_SIZE;
+	JOYSTICK.className = "joystick";
+	document.body.appendChild(JOYSTICK);
+
+	window.onresize = function(event) {//On mobile, make game fullscreen
+		var ratio_1 = window.innerWidth/CANVAS.true_width;
+		var ratio_2 = window.innerHeight/CANVAS.true_height;
+		if(ratio_1 < ratio_2){
+			CANVAS.style.height = "";
+			CANVAS.style.width = "100%";
+		}else{
+			CANVAS.style.height = "100%";
+			CANVAS.style.width = "";
+		}
+		
+		var rect = CANVAS.getBoundingClientRect();
+		var style = window.getComputedStyle(CANVAS);
+		CANVAS.true_width = rect.width + parseInt(style.getPropertyValue('border-left-width')) +parseInt(style.getPropertyValue('border-right-width'));
+		CANVAS.true_height = rect.height + parseInt(style.getPropertyValue('border-top-width')) +parseInt(style.getPropertyValue('border-top-width'));
+		
+			
+		var mindim = Math.min(window.innerWidth, window.innerHeight);
+		JOYSTICK.width = mindim*JOYSTICK_SIZE;
+		JOYSTICK.height = mindim*JOYSTICK_SIZE;
+		
+		render_joystick();
+		
+	};
+	window.onresize(null);
+}
 
 //GLOBAL VARIABLES
 
@@ -270,7 +315,7 @@ function CLASS_resources(){
 		
 		for(var i = 0; i < soundarray.length; i++){
 			that.sounds[i] = new Audio();
-			that.sounds[i].onloadeddata = on_loaded();
+			that.sounds[i].oncanplaythrough = on_loaded();
 			that.sounds[i].src = SOUND_DIR+soundarray[i];
 		}
 
@@ -357,8 +402,8 @@ function CLASS_input(){
 		var rect = CANVAS.getBoundingClientRect();
 		var style = window.getComputedStyle(CANVAS);
 		that.mouse_pos =  {
-			x: Math.round(evt.clientX - rect.left - parseInt(style.getPropertyValue('border-left-width'))),
-			y: Math.round(evt.clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')))
+			x: Math.round((evt.clientX - rect.left - parseInt(style.getPropertyValue('border-left-width')))/CANVAS.true_width*CANVAS.width),
+			y: Math.round((evt.clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')))/CANVAS.true_height*CANVAS.height)
 		};
 		
 		if(that.lastclick_button == 3){
@@ -537,6 +582,56 @@ function CLASS_input(){
 		return null;
 	}
 	
+	function handle_touch_global(evt){
+		//evt.preventDefault();
+		var touches = evt.changedTouches;
+		var rect = JOYSTICK.getBoundingClientRect();
+		var style = window.getComputedStyle(JOYSTICK);
+		
+		var changed = false;
+		
+		var mid_x = JOYSTICK.width/2;
+		var mid_y = JOYSTICK.height/2;
+			
+		for (var i=0; i < touches.length; i++) {
+			var x = Math.round(touches[i].clientX - rect.left - parseInt(style.getPropertyValue('border-left-width')));
+			var y = Math.round(touches[i].clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')));
+			
+			if(x >= 0 && x <= JOYSTICK.width && y >= 0 && y <= JOYSTICK.height){
+				if(x >= y){
+					if(-x+JOYSTICK.height >= y){
+						input.joystick_dir = DIR_UP;
+						changed = true;
+					}else{
+						input.joystick_dir = DIR_RIGHT;
+						changed = true;
+					}
+				}else{
+					if(-x+JOYSTICK.width >= y){
+						input.joystick_dir = DIR_LEFT;
+						changed = true;
+					}else{
+						input.joystick_dir = DIR_DOWN;
+						changed = true;
+					}
+				}
+				
+				render_joystick(x, y);
+			}
+		}
+		
+		if(!changed) {
+			render_joystick();
+			input.joystick_dir = DIR_NONE;
+		}
+	}
+	
+	function handle_touchend_global(evt){
+		//evt.preventDefault();
+		render_joystick();
+		input.joystick_dir = DIR_NONE;
+	}
+	
 //Public:
 	this.keys_down = new Array();
 	this.mouse_pos = {x: 0, y: 0};
@@ -546,6 +641,10 @@ function CLASS_input(){
 	this.lastclick_button = -1;
 	this.menu_pressed = -1;
 	this.lastklick_option = null;
+	
+	if(IS_TOUCH_DEVICE){
+		this.joystick_dir = DIR_NONE;
+	}
 	
 	this.init = function(){
 	
@@ -561,6 +660,14 @@ function CLASS_input(){
 		document.addEventListener('mousedown', handle_mousedown_global, false);
 		
 		document.addEventListener('mouseup', handle_mouseup_global, false);
+		
+		//Handle touch events
+		
+		document.addEventListener("touchstart", handle_touch_global, false);
+		
+		document.addEventListener("touchmove", handle_touch_global, false);
+		
+		document.addEventListener("touchend", handle_touchend_global, false);
 		
 		//Handle mouse controls (CANVAS)
 		CANVAS.addEventListener('mousemove', handle_mousemove, false);
@@ -1005,19 +1112,19 @@ function CLASS_game(){
 	
 	CLASS_entity.prototype.register_input = function(curr_x, curr_y){
 		if(!this.moving){
-			if(input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
+			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
 				if(game.walkable(curr_x, curr_y, DIR_LEFT)){
 					game.start_move(curr_x, curr_y, DIR_LEFT);
 				}
-			}else if(input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
 				if(game.walkable(curr_x, curr_y, DIR_UP)){
 					game.start_move(curr_x, curr_y, DIR_UP);
 				}
-			}else if(input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
 				if(game.walkable(curr_x, curr_y, DIR_RIGHT)){
 					game.start_move(curr_x, curr_y, DIR_RIGHT);
 				}
-			}else if(input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
 				if(game.walkable(curr_x, curr_y, DIR_DOWN)){
 					game.start_move(curr_x, curr_y, DIR_DOWN);
 				}
@@ -2557,13 +2664,13 @@ var update_entities = function(){
 
 //Render scene
 var render = function () {
-	update();
+	//update();//Put update into render function; assuming requestAnimationFrame runs @60Hz.
 	
 	//CTX.fillStyle="red";
 	//CTX.fillRect(0, 0, SCREEN_WIDTH, MENU_HEIGHT);
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
 	
-	if (game.update_drawn) {//This prevents the game from rendering the same thing twice.
+	if (game.update_drawn) {//This prevents the game from rendering the same thing twice (useless if update() in render function).
 		window.requestAnimationFrame(render);
 		return;
 	}
@@ -2775,6 +2882,12 @@ function render_field_subset(consumable){
 				if(y > 0 && game.level_array[x][y-1].moving && game.level_array[x][y-1].face_dir == DIR_DOWN && game.level_array[x][y-1].consumable == consumable){
 					render_block(x, y-1, RENDER_BOTTOM);
 				}
+				
+				if(y > 0 && (!game.level_array[x][y-1].moving) && game.level_array[x][y-1].consumable == consumable){
+					if(x > 0 && game.level_array[x-1][y].face_dir != DIR_RIGHT){
+						render_block(x, y-1, RENDER_BOTTOM_BORDER);
+					}
+				}
 			
 				if(block.consumable == consumable){
 					if(!block.moving || block.face_dir == DIR_LEFT || block.face_dir == DIR_RIGHT){
@@ -2929,6 +3042,8 @@ function render_block(x, y, render_option){
 			}else if(block.face_dir == DIR_UP){
 				CTX.drawImage(res.images[block.animation_frame], 0, -offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height+offset_y, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+block.fine_offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height+offset_y);
 			}
+		}else if(render_option == RENDER_BOTTOM_BORDER){//Render the bottom 4 pixels
+			CTX.drawImage(res.images[block.animation_frame], 0, 24, res.images[block.animation_frame].width-4, 4, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y+24, res.images[block.animation_frame].width-4, 4);
 		}
 	}
 }
@@ -3017,6 +3132,29 @@ function render_displays(){
 	}
 }
 
+function render_joystick(x, y){
+	var mid_x = JOYSTICK.width/2;
+	var mid_y = JOYSTICK.height/2;
+	
+	JOYCTX.clearRect ( 0 , 0 , JOYSTICK.width, JOYSTICK.height );
+	JOYCTX.globalAlpha = 0.5;//Set joystick half-opaque (1 = opaque, 0 = fully transparent)
+	JOYCTX.beginPath();
+	JOYCTX.arc(mid_x,mid_y,JOYSTICK.width/4+10,0,2*Math.PI);
+	JOYCTX.stroke();
+	
+	if(typeof x !== 'undefined' && typeof y !== 'undefined'){
+		var dist = Math.sqrt(Math.pow(x-mid_x,2)+Math.pow(y-mid_y,2));
+		if(dist > JOYSTICK.width/4){
+			x = mid_x + (x-mid_x)/dist*JOYSTICK.width/4;
+			y = mid_y + (y-mid_y)/dist*JOYSTICK.width/4;
+		}
+		JOYCTX.beginPath();
+		JOYCTX.arc(x, y, 10, 0,2*Math.PI, false);  // a circle at the start
+		JOYCTX.fillStyle = "red";
+		JOYCTX.fill();
+	}
+}
+
 //Use window.requestAnimationFrame, get rid of browser differences.
 (function() {
     var lastTime = 0;
@@ -3043,6 +3181,6 @@ function render_displays(){
         };
 }());
 
-//setInterval(update, 1000/UPS);//Update thread
+setInterval(update, 1000/UPS);//Update thread
 
 render();//Render thread
