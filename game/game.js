@@ -20,7 +20,7 @@ var LEV_START_DELAY = 2;
 if(DEBUG) LEV_START_DELAY = 1;
 var LEV_STOP_DELAY = 2;
 if(DEBUG) LEV_STOP_DELAY = 1;
-var ANIMATION_DURATION = 4;//How many times the game has to render before the image changes
+var ANIMATION_DURATION = 8;//How many times the game has to render before the image changes
 
 var DEFAULT_VOLUME = 0.7;
 
@@ -138,13 +138,13 @@ function CLASS_resources(){
 			}
 		}
 
-		for(var i = 0; i < 9; i++){//From 31 to 39 stones
+		for(var i = 0; i < 9; i++){//From 31 to 38 stones
 			that.images[31+i] = new Image();
 			that.images[31+i].onload = on_loaded();
 			that.images[31+i].src = IMAGE_DIR+"stone_"+i+".png";
 		}
 		
-		//Number 40 is missing because I'm a retard. Hihihi.
+		//Numbers 39 and 40 are missing because I'm a retard. Hihihi.
 
 		for(var i = 0; i < 6; i++){//From 41 to 58 doors
 			for(var j = 0; j < 3; j++){//Reversed order for ease of access
@@ -763,7 +763,9 @@ function CLASS_game(){
 	//Players, blocks, opponents. Even dummy block, everything of that is in the entity class.
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
 	
-	function CLASS_entity(a_id){
+	function CLASS_entity(){
+	}
+	CLASS_entity.prototype.init = function(a_id){
 		//Public:
 		this.id = a_id
 		this.moving = false;
@@ -992,9 +994,9 @@ function CLASS_game(){
 		if(this.gets_removed_in == 0){
 			if(this.moving){
 				var dst = game.dir_to_coords(curr_x, curr_y, this.face_dir);
-				game.level_array[dst.x][dst.y] = new CLASS_entity(0);
+				game.level_array[dst.x][dst.y].init(0);
 			}
-			game.level_array[curr_x][curr_y] = new CLASS_entity(0);
+			game.level_array[curr_x][curr_y].init(0);
 		}else if(this.gets_removed_in > 0){
 			this.gets_removed_in -= 1;
 			vis.update_animation(curr_x, curr_y);
@@ -1084,8 +1086,8 @@ function CLASS_game(){
 	//GAME CLASS
 	//Core engine, entity class, game ending criteria and much more
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
-	this.move_speed = 2;
-	this.door_removal_delay = 4;
+	this.move_speed = 1;
+	this.door_removal_delay = 8;
 	
 	this.initialized = false;
 	this.wait_timer = INTRO_DURATION*UPS;
@@ -1152,7 +1154,8 @@ function CLASS_game(){
 		
 		for(var y = 0; y < LEV_DIMENSION_Y; y++){
 			for(var x = 0; x < LEV_DIMENSION_X; x++){
-				that.level_array[x][y] = new CLASS_entity(res.levels[lev_number][x][y]);
+				that.level_array[x][y] = new CLASS_entity();
+				that.level_array[x][y].init(res.levels[lev_number][x][y]);
 				
 				if(res.levels[lev_number][x][y] == 4){
 					that.num_bananas++;
@@ -1229,7 +1232,7 @@ function CLASS_game(){
 			that.level_array[src_x][src_y].pushing = true;
 			that.start_move(dst.x, dst.y, dir);
 		}else{
-			that.level_array[dst.x][dst.y] = new CLASS_entity(-1);//DUMMYBLOCK, invisible and blocks everything.
+			that.level_array[dst.x][dst.y].init(-1);//DUMMYBLOCK, invisible and blocks everything.
 		}
 		
 		vis.update_animation(src_x,src_y);
@@ -1292,7 +1295,9 @@ function CLASS_game(){
 				that.play_sound(5);
 			}
 		}
+		var swapper = that.level_array[dst.x][dst.y];
 		that.level_array[dst.x][dst.y] = that.level_array[src_x][src_y];
+		that.level_array[src_x][src_y] = swapper;
 		
 		var back_dir = that.opposite_dir(dir);
 		var before_src = that.dir_to_coords(src_x, src_y, back_dir);
@@ -1312,9 +1317,9 @@ function CLASS_game(){
 		that.level_array[dst.x][dst.y].is_small && ((that.is_in_bounds(before_src2.x, before_src2.y) && (that.level_array[before_src2.x][before_src2.y].is_small &&  that.level_array[before_src2.x][before_src2.y].moving && that.level_array[before_src2.x][before_src2.y].face_dir == possibilities[1])) ||
 		(that.is_in_bounds(before_src3.x, before_src3.y) && (that.level_array[before_src3.x][before_src3.y].is_small &&  that.level_array[before_src3.x][before_src3.y].moving && that.level_array[before_src3.x][before_src3.y].face_dir == possibilities[0])))
 		){
-			that.level_array[src_x][src_y] = new CLASS_entity(-1);
+			that.level_array[src_x][src_y].init(-1);
 		}else{		
-			that.level_array[src_x][src_y] = new CLASS_entity(0);
+			that.level_array[src_x][src_y].init(0);
 		}
 		
 		if(that.level_array[dst.x][dst.y].id == 1){//Rectify the position of berti
