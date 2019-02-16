@@ -1005,7 +1005,7 @@ function CLASS_game(){
 				var diff_y = game.berti_positions[closest_berti].y - curr_y;
 				
 				//THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
-				var closest_berti_obj = game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y];
+				/*var closest_berti_obj = game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y];
 				
 				if(closest_berti_obj.moving){
 					var next_pos = game.dir_to_coords(game.berti_positions[closest_berti].x, game.berti_positions[closest_berti].y, closest_berti_obj.face_dir);
@@ -1013,7 +1013,7 @@ function CLASS_game(){
 						if(Math.abs(closest_berti_obj.moving_offset.x) + Math.abs(closest_berti_obj.moving_offset.x) >= 15)
 						return;
 					}
-				}//END OF OPTIONAL FIX
+				}*///END OF OPTIONAL FIX
 				
 				var dir1;
 				var dir2;
@@ -1117,22 +1117,26 @@ function CLASS_game(){
 		}
 	}
 	
-	CLASS_entity.prototype.register_input = function(curr_x, curr_y){
+	CLASS_entity.prototype.register_input = function(curr_x, curr_y, just_prime){
 		if(!this.moving){
-			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT)){
-				if(game.walkable(curr_x, curr_y, DIR_LEFT)){
+			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT) || (game.prime_movement && game.walk_dir == DIR_LEFT)){
+				game.prime_movement = just_prime;
+				if(!just_prime && game.walkable(curr_x, curr_y, DIR_LEFT)){
 					game.start_move(curr_x, curr_y, DIR_LEFT);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP)){
-				if(game.walkable(curr_x, curr_y, DIR_UP)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP) || (game.prime_movement && game.walk_dir == DIR_UP)){
+				game.prime_movement = just_prime;
+				if(!just_prime && game.walkable(curr_x, curr_y, DIR_UP)){
 					game.start_move(curr_x, curr_y, DIR_UP);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT)){
-				if(game.walkable(curr_x, curr_y, DIR_RIGHT)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT) || (game.prime_movement && game.walk_dir == DIR_RIGHT)){
+				game.prime_movement = just_prime;
+				if(!just_prime && game.walkable(curr_x, curr_y, DIR_RIGHT)){
 					game.start_move(curr_x, curr_y, DIR_RIGHT);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN)){
-				if(game.walkable(curr_x, curr_y, DIR_DOWN)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN) || (game.prime_movement && game.walk_dir == DIR_DOWN)){
+				game.prime_movement = just_prime;
+				if(!just_prime && game.walkable(curr_x, curr_y, DIR_DOWN)){
 					game.start_move(curr_x, curr_y, DIR_DOWN);
 				}
 			}
@@ -1140,57 +1144,30 @@ function CLASS_game(){
 	}
 	//After each update, this function gets called for (every) Berti to see if he was caught!
 	CLASS_entity.prototype.check_enemy_proximity = function(curr_x, curr_y){
-		var fine_x = curr_x*24 + this.moving_offset.x;
-		var fine_y = curr_y*24 + this.moving_offset.y;
 		
-		var next_pos;
-		if(this.moving){
-			next_pos = game.dir_to_coords(curr_x, curr_y, this.face_dir);
-		}else{
-			next_pos = {x:-1,y:-1};
-		}
+		if(this.moving_offset.x != 0 || this.moving_offset.y != 0) return;
 		
 		var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
 		for(var i = 0; i < adj_array.length; i++){
 			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){//If there's an opponent on this adjacent tile
-			
-				if(game.level_array[adj_array[i].x][adj_array[i].y].moving){//If the opponent is moving
-					var enemy_np = game.dir_to_coords(adj_array[i].x, adj_array[i].y, game.level_array[adj_array[i].x][adj_array[i].y].face_dir);
-					
-					if(Math.abs(curr_x - enemy_np.x) == 1 && Math.abs(curr_y - enemy_np.y) == 1){//If the opponent's destination is diagonally AND
-						if((game.level_array[enemy_np.x][curr_y].id != -1 && game.level_array[enemy_np.x][curr_y].id != 0 && (enemy_np.x != next_pos.x || curr_y != next_pos.y)) ||
-							(game.level_array[curr_x][enemy_np.y].id != -1 && game.level_array[curr_x][enemy_np.y].id != 0 && (curr_x != next_pos.x || enemy_np.y != next_pos.y))){
-							break;//Don't perform a proximity check for this particular foe.
-						}
-					}
-				}
-			
+				var enemy_moving_offset_x = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
+				var enemy_moving_offset_y = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
+				if(enemy_moving_offset_x != 0 || enemy_moving_offset_y != 0) continue;
+				
 				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){//If the opponent is diagonally AND
-					if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0 && (adj_array[i].x != next_pos.x || curr_y != next_pos.y)) ||
-						(game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0 && (curr_x != next_pos.x || adj_array[i].y != next_pos.y))){
-						break;//Don't perform a proximity check for this particular foe.
-					}
-				}else if(this.moving){
-					if((Math.abs(next_pos.x - adj_array[i].x) == 1 && Math.abs(next_pos.y - adj_array[i].y) == 1) &&
-					((game.level_array[adj_array[i].x][next_pos.y].id != -1 && game.level_array[adj_array[i].x][next_pos.y].id != 0 && (adj_array[i].x != curr_x || next_pos.y != curr_y)) ||
-					 (game.level_array[next_pos.x][adj_array[i].y].id != -1 && game.level_array[next_pos.x][adj_array[i].y].id != 0 && (next_pos.x != curr_x || adj_array[i].y != curr_y)))){
-						break;//Don't perform a proximity check for this particular foe.
+					//there's an obstacle in the way
+					if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0) ||
+						(game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0)){
+						continue;//Don't perform a proximity check for this particular foe.
 					}
 				}
 			
-				var enemy_fine_x = adj_array[i].x*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
-				var enemy_fine_y = adj_array[i].y*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
-				
-				//var dist = Math.sqrt(Math.pow(fine_x-enemy_fine_x, 2) + Math.pow(fine_y-enemy_fine_y, 2));//Pythagoras
-				//dist <= 24+1//Not so good for this game
-				
-				if(Math.abs(fine_x-enemy_fine_x) <= 24 && Math.abs(fine_y-enemy_fine_y) <= 24){//Rectangular hit test.
-					game.play_sound(1);
-					game.wait_timer = LEV_STOP_DELAY*UPS;
-					game.level_ended = 2;
-					vis.update_all_animations();
-					return;
-				}
+				//Got caught!
+				game.play_sound(1);
+				game.wait_timer = LEV_STOP_DELAY*UPS;
+				game.level_ended = 2;
+				vis.update_all_animations();
+				return;
 			}
 		}
 	}
@@ -1237,8 +1214,12 @@ function CLASS_game(){
 	this.sound = !DEBUG;
 	this.soundrestriction_removed = false;
 	
+	this.update_tick = 0;
+	this.prime_movement = false;
+	
 	this.load_level = function(lev_number){
 		that.mode = 1;
+		that.update_tick = 0;
 	
 		that.steps_taken = 0;
 		that.num_bananas = 0;
@@ -2630,6 +2611,7 @@ var update = function () {
 			}else if(game.mode == 1){
 				if(game.wait_timer <= 0){
 					if(game.level_ended == 0){
+						game.update_tick++;
 						update_entities();
 					}else if(game.level_ended == 1){
 						game.update_savegame(game.level_number, game.steps_taken);
@@ -2652,24 +2634,28 @@ var update = function () {
 };
 
 var update_entities = function(){
-
+	var tick = (game.update_tick*60/UPS);
+	var synced_move = tick % (12/game.move_speed) == 0;
+	
 	//The player moves first at all times to ensure the best response time and remove directional quirks.
 	for(var i = 0; i < game.berti_positions.length; i++){
-		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].register_input(game.berti_positions[i].x, game.berti_positions[i].y);
+		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].register_input(game.berti_positions[i].x, game.berti_positions[i].y, !synced_move);
 	}
-
-	//NPC logic and stop walking logic.
-	for(var y = 0; y < LEV_DIMENSION_Y; y++){
-		for(var x = 0; x < LEV_DIMENSION_X; x++){
-			if(game.level_array[x][y].id == 2){//MENU Berti
-				game.level_array[x][y].move_randomly(x,y);
-			}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){//Purple and green monster
-				game.level_array[x][y].chase_berti(x,y);
-			}
-			
-			if(game.level_array[x][y].just_moved){
-				game.level_array[x][y].just_moved = false;
-				vis.update_animation(x,y);
+	
+	if(synced_move){
+		//NPC logic and stop walking logic.
+		for(var y = 0; y < LEV_DIMENSION_Y; y++){
+			for(var x = 0; x < LEV_DIMENSION_X; x++){
+				if(game.level_array[x][y].id == 2){//MENU Berti
+					game.level_array[x][y].move_randomly(x,y);
+				}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){//Purple and green monster
+					game.level_array[x][y].chase_berti(x,y);
+				}
+				
+				if(game.level_array[x][y].just_moved){
+					game.level_array[x][y].just_moved = false;
+					vis.update_animation(x,y);
+				}
 			}
 		}
 	}
