@@ -1,3 +1,6 @@
+//Please note that this code is quite old, my first large project in JavaScript
+//and therefore the code structure is not very good.
+
 "use strict";
 var DEBUG = false;
 var AUTHOR = "Benjamin";
