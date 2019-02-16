@@ -10,9 +10,9 @@ var LEV_OFFSET_Y = 79;
 var LEV_DIMENSION_X = 21;
 var LEV_DIMENSION_Y = 13;
 var MENU_HEIGHT = 20;
-var INTRO_DURATION = 1;//6;//In seconds
+var INTRO_DURATION = 2;//6;//In seconds
 var LEV_START_DELAY = 1;//2;
-var LEV_STOP_DELAY = 1;//2;
+var LEV_STOP_DELAY = 1//2;
 
 var DIR_NONE = -1;
 var DIR_UP = 0;
@@ -333,6 +333,7 @@ function CLASS_game(){
 		this.face_dir = DIR_DOWN;
 		this.animation_frame = 0;
 		this.berti_id = -1;//Multiple bertis are possible, this makes the game engine much more flexible
+		this.sees_berti = false;
 		
 		this.can_push = 0;
 		if(this.id == 1 || this.id == 2 || this.id == 5 || this.id == 7){//Those are the guys who can push blocks, Berti, MENU Berti, light block, purple monster
@@ -345,6 +346,10 @@ function CLASS_game(){
 		this.consumable = 0;
 		if(this.id == 4 || (this.id >= 13 && this.id <= 18)){//Those are the guys who are consumable, namely banana and the 6 keys
 			this.consumable = 1;
+		}
+		this.is_small = 0;
+		if(this.id == 1 || this.id == 2 || this.id == 7 || this.id == 10){//Those are small entities, Berti, MENU Berti, purple monster, green monster
+			this.is_small = 1;//This is a technical attribute. Small entities can go into occupied, moving places from all directions.
 		}
 		
 		this.move_randomly = function(curr_x, curr_y){
@@ -389,6 +394,8 @@ function CLASS_game(){
 					game.start_move(curr_x, curr_y, back_dir);
 					return;
 				}
+				
+				//Here's the code if that dude can't go anywhere
 			}
 		}
 		
@@ -398,7 +405,13 @@ function CLASS_game(){
 				var closest_berti = -1;
 				
 				for(var i = 0; i < game.berti_positions.length; i++){
-					if(game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
+					var face_right_direction = 
+					(that.face_dir == DIR_DOWN && game.berti_positions[i].y >= curr_y) || 
+					(that.face_dir == DIR_UP && game.berti_positions[i].y <= curr_y) || 
+					(that.face_dir == DIR_LEFT && game.berti_positions[i].x <= curr_x) || 
+					(that.face_dir == DIR_RIGHT && game.berti_positions[i].x >= curr_x);
+					
+					if(face_right_direction && game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
 						var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);//Manhattan distance
 						if(distance < closest_dist || (distance == closest_dist && Math.random() < 0.50)){
 							closest_dist = distance;
@@ -408,9 +421,88 @@ function CLASS_game(){
 				}
 				
 				if(closest_berti == -1){//Can't see berti; Random search
+					that.sees_berti = false;
 					that.move_randomly(curr_x, curr_y);
-				}else{
-				
+				}else{//Chasing code here.
+					if(!that.sees_berti){
+						that.sees_berti = true;
+						if(that.id == 7){
+							game.play_sound(2);
+						}else if(that.id == 10){
+							game.play_sound(3);
+						}
+					}
+					var diff_x = game.berti_positions[closest_berti].x - curr_x;
+					var diff_y = game.berti_positions[closest_berti].y - curr_y;
+					
+					/*if(Math.abs(diff_x)+Math.abs(diff_y) <= 1){
+						if(Math.abs(game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y].moving_offset.x)+
+						Math.abs(game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y].moving_offset.x) == 0){
+							game.play_sound(1);
+							game.wait_timer = LEV_STOP_DELAY*UPS;
+							game.level_ended = 2;
+							return;
+						}
+					}*/
+					
+					var dir1;
+					var dir2;
+					
+					if(diff_x == 0){
+						if(diff_y == 0){//This should NEVER happen.
+							that.move_randomly(curr_x, curr_y);
+							return;
+						}else if(diff_y > 0){
+							dir1 = dir2 = DIR_DOWN;
+						}else{//diff_y < 0
+							dir1 = dir2 = DIR_UP;
+						}
+					}else if(diff_x > 0){
+						if(diff_y == 0){
+							dir1 = dir2 = DIR_RIGHT;
+						}else if(diff_y > 0){
+							dir1 = DIR_RIGHT;
+							dir2 = DIR_DOWN;
+						}else{//diff_y < 0
+							dir1 = DIR_RIGHT
+							dir2 = DIR_UP;
+						}
+					}else{//diff_x < 0
+						if(diff_y == 0){
+							dir1 = dir2 = DIR_LEFT;
+						}else if(diff_y > 0){
+							dir1 = DIR_LEFT;
+							dir2 = DIR_DOWN;
+						}else{//diff_y < 0
+							dir1 = DIR_LEFT
+							dir2 = DIR_UP;
+						}
+					}
+					
+					if(dir1 != dir2){
+						var total_distance = Math.abs(diff_x) + Math.abs(diff_y);
+						var percentage_x = Math.abs(diff_x / total_distance);
+						
+						if(Math.random() >= percentage_x){
+							var swapper = dir1;
+							dir1 = dir2;
+							dir2 = swapper;
+						}
+						if(game.walkable(curr_x, curr_y, dir1)){
+							game.start_move(curr_x, curr_y, dir1);
+						}else if(game.walkable(curr_x, curr_y, dir2)){
+							game.start_move(curr_x, curr_y, dir2);
+						}else{
+							that.move_randomly(curr_x, curr_y);
+						}
+					}else{
+						if(game.walkable(curr_x, curr_y, dir1)){
+							game.start_move(curr_x, curr_y, dir1);
+						}else{
+							that.move_randomly(curr_x, curr_y);
+						}
+					}
+					
 				}
 			}
 		}
@@ -463,6 +555,28 @@ function CLASS_game(){
 				}
 			}
 		}
+		
+		this.check_enemy_proximity = function(curr_x, curr_y){
+			var fine_x = curr_x*24 + game.level_array[curr_x][curr_y].moving_offset.x;
+			var fine_y = curr_y*24 + game.level_array[curr_x][curr_y].moving_offset.y;
+			
+			var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
+			for(var i = 0; i < adj_array.length; i++){
+				if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){
+					var enemy_fine_x = adj_array[i].x*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
+					var enemy_fine_y = adj_array[i].y*24 + game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
+					
+					var dist = Math.sqrt(Math.pow(fine_x-enemy_fine_x, 2) + Math.pow(fine_y-enemy_fine_y, 2));//Pythagoras
+
+					if(dist <= 24+1){
+						game.play_sound(1);
+						game.wait_timer = LEV_STOP_DELAY*UPS;
+						game.level_ended = 2;
+						return;
+					}
+				}
+			}
+		}
 
 	}
 ///////////////////////////////////END ENTITY
@@ -496,7 +610,7 @@ function CLASS_game(){
 	this.buttons_activated[0] = this.buttons_activated[2] = false;
 	this.buttons_activated[1] = true;
 	
-	this.sound = false;
+	this.sound = true;
 	
 	this.load_level = function(lev_number){
 		that.steps_taken = 0;
@@ -546,6 +660,7 @@ function CLASS_game(){
 			that.play_sound(8);
 		}
 	}
+	
 	this.remove_door = function(id){
 		that.play_sound(9);
 		for(var y = 0; y < LEV_DIMENSION_Y; y++){
@@ -561,7 +676,7 @@ function CLASS_game(){
 		
 		var dst = that.dir_to_coords(curr_x, curr_y, dir);
 		
-		if(dst.x < 0 || dst.y < 0 || dst.x >= LEV_DIMENSION_X || dst.y >= LEV_DIMENSION_Y){//Can't go out of boundaries
+		if(!this.is_in_bounds(dst.x, dst.y)){//Can't go out of boundaries
 			return false;
 		}
 		
@@ -577,8 +692,10 @@ function CLASS_game(){
 					return false;
 				}
 			}
+		}else if(that.level_array[dst.x][dst.y].face_dir == dir){//If the block is already moving away in the right direction
+			return true;
 		}else{
-			return false;//The object is already moving and can't be pushed
+			return false;
 		}
 	}
 	
@@ -594,6 +711,8 @@ function CLASS_game(){
 		
 		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable == 1){
 			//Om nom nom start
+		}else if(that.level_array[dst.x][dst.y].moving == true){
+			//It's moving out of place by itself, don't do anything
 		}else if(that.level_array[dst.x][dst.y].id != 0){
 			that.level_array[src_x][src_y].pushing = true;
 			that.start_move(dst.x, dst.y, dir);
@@ -647,13 +766,21 @@ function CLASS_game(){
 		}else if(that.sound){
 			var dst2 = that.dir_to_coords(dst.x, dst.y, dir);
 			if(	(that.level_array[src_x][src_y].id == 5 || that.level_array[src_x][src_y].id == 6) &&
-				(dst2.x < 0 || dst2.y < 0 || dst2.x >= LEV_DIMENSION_X || dst2.y >= LEV_DIMENSION_Y || that.level_array[dst2.x][dst2.y].id == 3)){
+				(!that.is_in_bounds(dst2.x, dst2.y) || that.level_array[dst2.x][dst2.y].id == 3)){
 				that.play_sound(5);
 			}
 		}
 		that.level_array[dst.x][dst.y] = that.level_array[src_x][src_y];
-		that.level_array[src_x][src_y] = new CLASS_entity(0);
-		if(that.level_array[dst.x][dst.y].id == 1){
+		
+		before_src = that.dir_to_coords(src_x, src_y, that.opposite_dir(dir));
+		
+		if(that.is_in_bounds(before_src.x, before_src.y) && (that.level_array[before_src.x][before_src.y].moving == true && that.level_array[before_src.x][before_src.y].face_dir == dir)){
+			that.level_array[src_x][src_y] = new CLASS_entity(-1);
+		}else{		
+			that.level_array[src_x][src_y] = new CLASS_entity(0);
+		}
+		
+		if(that.level_array[dst.x][dst.y].id == 1){//Rectify the position of berti
 			that.berti_positions[that.level_array[dst.x][dst.y].berti_id] = dst;
 		}
 	}
@@ -701,14 +828,39 @@ function CLASS_game(){
 		}
 	}
 	
+	this.get_adjacent_tiles = function(tile_x, tile_y){
+		//var result; = new Array();
+
+		//if(tile_x-1 >= 0 && tile_y-1 >= 0 && tile_x+1 < LEV_DIMENSION_X && tile_y+1 < LEV_DIMENSION_Y){
+		//	return new Array({x:tile_x-1, y:tile_y-1}, {x:tile_x-1, y:tile_y}, {x:tile_x-1, y:tile_y+1}, {x:tile_x, y:tile_y-1}, {x:tile_x, y:tile_y+1}, {x:tile_x+1, y:tile_y-1}, {x:tile_x+1, y:tile_y}, {x:tile_x+1, y:tile_y+1});
+		//}else{
+			var result = new Array();
+			for(var i = -1; i <= 1; i++){
+				for(var j = -1; j <= 1; j++){
+					if(i != 0 || j != 0){
+						if(that.is_in_bounds(tile_x+i, tile_y+j)){
+							result.push({x:(tile_x+i), y:(tile_y+j)});
+						}
+					}
+				}
+			}
+			return result;
+		//}
+		
+	}
+	
+	this.is_in_bounds = function(tile_x, tile_y){
+		return (tile_x >= 0 && tile_y >= 0 && tile_x < LEV_DIMENSION_X && tile_y < LEV_DIMENSION_Y);
+	}
+	
 	this.can_see_tile = function(eye_x, eye_y, tile_x, tile_y){
 		var diff_x = tile_x - eye_x;
 		var diff_y = tile_y - eye_y;
 		
-		var walk1_x = 0;
-		var walk1_y = 0;
-		var walk2_x = 0;
-		var walk2_y = 0;
+		var walk1_x;
+		var walk1_y;
+		var walk2_x;
+		var walk2_y;
 		
 		if (diff_x==0){
 			if(diff_y==0){
@@ -808,6 +960,7 @@ function CLASS_game(){
 			}
 		}
 		
+		
 		var x_offset = 0;
 		var y_offset = 0;
 		var x_ratio1;
@@ -883,7 +1036,7 @@ function CLASS_game(){
 	
 	this.play_sound = function(id){
 		if(!that.sound) return;
-		res.sounds[id].currentTime=0;
+		if(!res.sounds[id].currentTime==0) res.sounds[id].currentTime=0;
 		res.sounds[id].play();
 		//Useful commands
 		//audioElement.pause();
@@ -945,6 +1098,7 @@ var update_entities = function(){
 		for(var x = 0; x < LEV_DIMENSION_X; x++){
 			if(game.level_array[x][y].id == 1){//Berti
 				game.level_array[x][y].register_input(x,y);
+				game.level_array[x][y].check_enemy_proximity(x,y);
 			}else if(game.level_array[x][y].id == 2){//MENU Berti
 				game.level_array[x][y].move_randomly(x,y);
 			}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){//Purple and green monster
