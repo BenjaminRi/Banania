@@ -1,5 +1,6 @@
 "use strict";
-var DEBUG = false;
+var DEBUG = true;
+var AUTHOR = "Benjamin";
 
 //GLOBAL CONSTANTS
 var UPS = 30;
@@ -763,8 +764,6 @@ function CLASS_game(){
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
 	
 	function CLASS_entity(a_id){
-		//Private:
-		var that = this;
 		//Public:
 		this.id = a_id
 		this.moving = false;
@@ -2465,7 +2464,6 @@ function CLASS_visual(){
 	}
 	
 }
-var TIMINGARRAY = new Array();
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
 //UPDATING PROCESS
@@ -2505,8 +2503,6 @@ var update = function () {
 	
 	var now = Date.now();
 	game.delta_updated = now - game.last_updated;
-	if(TIMINGARRAY.length < 20 && game.delta_updated > 20)
-	TIMINGARRAY.push(game.delta_updated);
 	game.last_updated = now;
 	
 	game.update_drawn = false;
@@ -2556,12 +2552,13 @@ var update_entities = function(){
 
 //Render scene
 var render = function () {
+	update();
+	
 	//CTX.fillStyle="red";
 	//CTX.fillRect(0, 0, SCREEN_WIDTH, MENU_HEIGHT);
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
 	
 	if (game.update_drawn) {//This prevents the game from rendering the same thing twice.
-		//game.update_drawn = false;
 		window.requestAnimationFrame(render);
 		return;
 	}
@@ -2573,11 +2570,17 @@ var render = function () {
 		CTX.drawImage(res.images[10], 427, 41);//Ladder
 		render_displays();
 		render_buttons();
-		if(game.mode == 0){
+		if(game.mode == 0){//Title image
 			CTX.drawImage(res.images[1], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
+			
+			CTX.fillStyle = "rgb(0, 0, 0)";
+			CTX.font = "bold 12px Helvetica";
+			CTX.textAlign = "left";
+			CTX.textBaseline = "bottom";
+			CTX.fillText("JavaScript remake by " + AUTHOR, 140, 234);
 		}else if(game.mode == 1){
 			render_field();
-		}else if(game.mode == 2){
+		}else if(game.mode == 2){//Won!
 			CTX.drawImage(res.images[170], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 		}
 		render_vol_bar();
@@ -2591,8 +2594,8 @@ var render = function () {
 		CTX.textBaseline = "middle";
 		CTX.fillText("Loading...", SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
 	}
+	if(DEBUG) render_fps();
 	
-	render_fps();
 	window.requestAnimationFrame(render);
 };
 
@@ -3035,6 +3038,6 @@ function render_displays(){
         };
 }());
 
-setInterval(update, 1000/UPS);//Update thread
+//setInterval(update, 1000/UPS);//Update thread
 
-window.requestAnimationFrame(render);//Render thread
+render();//Render thread
