@@ -1,15 +1,15 @@
-//Please note that this code is quite old, my first large project in JavaScript
-//and therefore the code structure is not very good.
+// Please note that this code is quite old, my first large project in JavaScript
+// and therefore the code structure is not very good.
 
 "use strict";
 var DEBUG = false;
 var AUTHOR = "Benjamin";
 
-//GLOBAL CONSTANTS
-var JOYSTICK_SIZE = 0.4;//In terms of the smaller of the two screen dimensions
+// GLOBAL CONSTANTS
+var JOYSTICK_SIZE = 0.4;// In terms of the smaller of the two screen dimensions
 var IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
 
-var UPS = IS_TOUCH_DEVICE ? 15 : 60;//Reduced framerate on mobile
+var UPS = IS_TOUCH_DEVICE ? 15 : 60;// Reduced framerate on mobile
 var NUM_RESOURCES = 197;
 var IMAGE_DIR = "images/";
 var SOUND_DIR = "sound/";
@@ -20,13 +20,13 @@ var LEV_OFFSET_Y = 79;
 var LEV_DIMENSION_X = 21;
 var LEV_DIMENSION_Y = 13;
 var MENU_HEIGHT = 20;
-var INTRO_DURATION = 6;//In seconds
+var INTRO_DURATION = 6;// In seconds
 if(DEBUG) INTRO_DURATION = 2;
 var LEV_START_DELAY = 2;
 if(DEBUG) LEV_START_DELAY = 1;
 var LEV_STOP_DELAY = 2;
 if(DEBUG) LEV_STOP_DELAY = 1;
-var ANIMATION_DURATION = Math.round(8*UPS/60);//How many times the game has to render before the image changes
+var ANIMATION_DURATION = Math.round(8*UPS/60);// How many times the game has to render before the image changes
 
 var DEFAULT_VOLUME = 0.7;
 
@@ -55,10 +55,10 @@ var ERR_WRONGPW = 3;
 var ERR_NOTFOUND = 4;
 var ERR_EMPTYNAME = 5;
 
-//Check storage
+// Check storage
 var HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
 
-//Canvas creation
+// Canvas creation
 var CANVAS = document.createElement("canvas");
 var CTX = CANVAS.getContext("2d");
 CANVAS.width = SCREEN_WIDTH;
@@ -71,7 +71,7 @@ document.body.appendChild(CANVAS);
 var JOYSTICK;
 var JOYCTX;
 if(IS_TOUCH_DEVICE){
-	//Joystick creation
+	// Joystick creation
 	JOYSTICK = document.createElement("canvas");
 	JOYCTX = JOYSTICK.getContext("2d");
 	var mindim = Math.min(window.innerWidth, window.innerHeight);
@@ -80,7 +80,7 @@ if(IS_TOUCH_DEVICE){
 	JOYSTICK.className = "joystick";
 	document.body.appendChild(JOYSTICK);
 
-	window.onresize = function(event) {//On mobile, make game fullscreen
+	window.onresize = function(event) {// On mobile, make game fullscreen
 		var ratio_1 = window.innerWidth/CANVAS.true_width;
 		var ratio_2 = window.innerHeight/CANVAS.true_height;
 		if(ratio_1 < ratio_2){
@@ -107,32 +107,32 @@ if(IS_TOUCH_DEVICE){
 	window.onresize(null);
 }
 
-//GLOBAL VARIABLES
+// GLOBAL VARIABLES
 
-//MD5 digest for passwords
+// MD5 digest for passwords
 var md5 = new CLASS_md5();
 
-//Game
+// Game
 var game = new CLASS_game();
 
-//Resources
+// Resources
 var res = new CLASS_resources();
 res.load();
 
-//Input mechanics
+// Input mechanics
 var input = new CLASS_input();
 
-//Visual
+// Visual
 var vis = new CLASS_visual();
 vis.init_menus();
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//RESOURCES CLASS
-//Images, sounds, level. Just resources.
+// RESOURCES CLASS
+// Images, sounds, level. Just resources.
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 function CLASS_resources(){
-//Private:
+// Private:
 	var that = this;
 	var resources_loaded = 0;
 	var already_loading = false;
@@ -140,10 +140,10 @@ function CLASS_resources(){
 	function on_loaded(){
 		resources_loaded++;
 	};
-//Public:
+// Public:
 	this.images = new Array();
 	this.sounds = new Array();
-	this.levels = EXTERNAL_LEVELS;//External loading
+	this.levels = EXTERNAL_LEVELS;// External loading
 
 	this.ready = function(){
 		return (resources_loaded == NUM_RESOURCES);
@@ -166,19 +166,19 @@ function CLASS_resources(){
 		that.images[1].onload = on_loaded();
 		that.images[1].src = IMAGE_DIR+"entry.png";
 
-		for(var i = 0; i < 9; i++){//From 2 to 10 garbage
+		for(var i = 0; i < 9; i++){// From 2 to 10 garbage
 			that.images[2+i] = new Image();
 			that.images[2+i].onload = on_loaded();
 			that.images[2+i].src = IMAGE_DIR+"garbage_"+i+".png";
 		}
 
-		for(var i = 0; i < 11; i++){//From 11 to 21 digits
+		for(var i = 0; i < 11; i++){// From 11 to 21 digits
 			that.images[11+i] = new Image();
 			that.images[11+i].onload = on_loaded();
 			that.images[11+i].src = IMAGE_DIR+"digits_"+i+".png";
 		}
 
-		for(var i = 0; i < 3; i++){//From 22 to 30 buttons
+		for(var i = 0; i < 3; i++){// From 22 to 30 buttons
 			for(var j = 0; j < 3; j++){
 				that.images[22+3*i+j] = new Image();
 				that.images[22+3*i+j].onload = on_loaded();
@@ -186,40 +186,40 @@ function CLASS_resources(){
 			}
 		}
 
-		for(var i = 0; i < 9; i++){//From 31 to 38 stones
+		for(var i = 0; i < 9; i++){// From 31 to 38 stones
 			that.images[31+i] = new Image();
 			that.images[31+i].onload = on_loaded();
 			that.images[31+i].src = IMAGE_DIR+"stone_"+i+".png";
 		}
 		
-		//Numbers 39 and 40 are missing because I'm a retard. Hihihi.
+		// Numbers 39 and 40 contain no images due to a miscalculation
 
-		for(var i = 0; i < 6; i++){//From 41 to 58 doors
-			for(var j = 0; j < 3; j++){//Reversed order for ease of access
+		for(var i = 0; i < 6; i++){// From 41 to 58 doors
+			for(var j = 0; j < 3; j++){// Reversed order for ease of access
 				that.images[41+3*i+j] = new Image();
 				that.images[41+3*i+j].onload = on_loaded();
 				that.images[41+3*i+j].src = IMAGE_DIR+"doors_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 13; i++){//From 59 to 110 player (berti)
-			for(var j = 0; j < 4; j++){//Reversed order for ease of access
+		for(var i = 0; i < 13; i++){// From 59 to 110 player (berti)
+			for(var j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[59+4*i+j] = new Image();
 				that.images[59+4*i+j].onload = on_loaded();
 				that.images[59+4*i+j].src = IMAGE_DIR+"player_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 9; i++){//From 111 to 146 monster 1(purple)
-			for(var j = 0; j < 4; j++){//Reversed order for ease of access
+		for(var i = 0; i < 9; i++){// From 111 to 146 monster 1(purple)
+			for(var j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[111+4*i+j] = new Image();
 				that.images[111+4*i+j].onload = on_loaded();
 				that.images[111+4*i+j].src = IMAGE_DIR+"monster1_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 5; i++){//From 147 to 166 monster 2(green)
-			for(var j = 0; j < 4; j++){//Reversed order for ease of access
+		for(var i = 0; i < 5; i++){// From 147 to 166 monster 2(green)
+			for(var j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[147+4*i+j] = new Image();
 				that.images[147+4*i+j].onload = on_loaded();
 				that.images[147+4*i+j].src = IMAGE_DIR+"monster2_"+j+"-"+i+".png";
@@ -326,7 +326,7 @@ function CLASS_resources(){
 		// Level: //////////////////////////////////////////////
 		////////////////////////////////////////////////////////
 
-		//levels is now loaded externally
+		// levels is now loaded externally
 		if(that.levels !== null){
 			on_loaded();
 		}
@@ -334,12 +334,12 @@ function CLASS_resources(){
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//INPUT CLASS
-//Everything that has to do with keyboard and mouse input goes here
+// INPUT CLASS
+// Everything that has to do with keyboard and mouse input goes here
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 function CLASS_input(){
-//Private:
+// Private:
 	var that = this;
 	
 	function handle_keydown_global(evt) {
@@ -355,10 +355,10 @@ function CLASS_input(){
 			game.walk_dir = DIR_DOWN;
 		}
 		
-		if(vis.dbx.firstChild){//If a dialog box is open
-			if(that.keys_down[13]){//Enter
+		if(vis.dbx.firstChild){// If a dialog box is open
+			if(that.keys_down[13]){// Enter
 				vis.dbx.enterfun();
-			}else if(that.keys_down[27]){//Esc
+			}else if(that.keys_down[27]){// Esc
 				vis.dbx.cancelfun();
 			}
 		}
@@ -389,7 +389,7 @@ function CLASS_input(){
 		if(vis !== null && vis.dbx !== null && vis.dbx.style.display != "none"){
 			var rel_pos = {x:that.mouse_pos_global.x - parseInt(vis.dbx.style.left), y:that.mouse_pos_global.y - parseInt(vis.dbx.style.top)};
 			if(rel_pos.x > 0 && rel_pos.x < parseInt(vis.dbx.style.width) && rel_pos.y > 0 && rel_pos.y < 20){
-				evt.preventDefault();//Prevents from selecting the canvas
+				evt.preventDefault();// Prevents from selecting the canvas
 				vis.dbx.drag = true;
 				vis.dbx.drag_pos = rel_pos;
 			}
@@ -421,7 +421,7 @@ function CLASS_input(){
 	};
 
 	function handle_mousedown(evt){
-		evt.preventDefault();//Prevents from selecting the canvas
+		evt.preventDefault();// Prevents from selecting the canvas
 		that.mouse_lastclick = {x: that.mouse_pos.x, y: that.mouse_pos.y};
 		
 		if(that.mouse_pos.y >= 35 && that.mouse_pos.y <= 65){
@@ -641,7 +641,7 @@ function CLASS_input(){
 		that.joystick_dir = DIR_NONE;
 	}
 	
-//Public:
+// Public:
 	this.keys_down = new Array();
 	this.mouse_pos = {x: 0, y: 0};
 	this.mouse_pos_global = {x: 0, y: 0};
@@ -663,7 +663,7 @@ function CLASS_input(){
 
 		document.addEventListener('keyup', handle_keyup_global, false);
 		
-		//Handle mouse controls (GLOBAL)
+		// Handle mouse controls (GLOBAL)
 
 		document.addEventListener('mousemove', handle_mousemove_global, false);
 		
@@ -671,7 +671,7 @@ function CLASS_input(){
 		
 		document.addEventListener('mouseup', handle_mouseup_global, false);
 		
-		//Handle touch events
+		// Handle touch events
 		
 		document.addEventListener("touchstart", handle_touch_global, false);
 		
@@ -679,7 +679,7 @@ function CLASS_input(){
 		
 		document.addEventListener("touchend", handle_touchend_global, false);
 		
-		//Handle mouse controls (CANVAS)
+		// Handle mouse controls (CANVAS)
 		CANVAS.addEventListener('mousemove', handle_mousemove, false);
 			
 		CANVAS.addEventListener('mousedown', handle_mousedown, false);
@@ -691,17 +691,17 @@ function CLASS_input(){
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//GAME CLASS
-//Holds entities and the game itself
+// GAME CLASS
+// Holds entities and the game itself
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 function CLASS_game(){
-	//Private:
+// Private:
 	var that = this;
 	
 	
 	//////////////////////////////////////////////////////////////////////////////
-	//Savegame section:
+	// Savegame section:
 	//////////////////////////////////////////////////////////////////////////////
 	function CLASS_savegame(){
 		this.usernumber = -1;
@@ -758,13 +758,13 @@ function CLASS_game(){
 		
 		that.savegame.progressed = false;
 		
-		return ERR_SUCCESS;//Success!
+		return ERR_SUCCESS;// Success!
 	}
 	
 	this.retrieve_savegame = function(uname, pass){
 		var user_count = localStorage.getItem("user_count");
 		if(user_count === null){
-			return ERR_NOSAVE;//There are no save games
+			return ERR_NOSAVE;// There are no save games
 		}
 		user_count = parseInt(user_count);
 		pass = md5.digest(pass);
@@ -790,13 +790,13 @@ function CLASS_game(){
 						that.load_level(that.level_unlocked);
 					}
 					
-					return ERR_SUCCESS;//Success!
+					return ERR_SUCCESS;// Success!
 				}else{
-					return ERR_WRONGPW;//Wrong password!
+					return ERR_WRONGPW;// Wrong password!
 				}
 			}
 		}
-		return ERR_NOTFOUND;//There's no such name
+		return ERR_NOTFOUND;// There's no such name
 	}
 	
 	this.name_savegame = function(uname, pass){
@@ -806,13 +806,13 @@ function CLASS_game(){
 			for(var i = 0; i < user_count; i++){
 				var prefix = "player"+i+"_";
 				if(localStorage.getItem(prefix+"username") == uname){
-					return ERR_EXISTS;//Failed already exists
+					return ERR_EXISTS;// Failed already exists
 				}
 			}	
 		}
 		that.savegame.username = uname;
 		that.savegame.password = md5.digest(pass)
-		return ERR_SUCCESS;//Worked
+		return ERR_SUCCESS;// Worked
 	}
 	
 	this.change_password = function(pass, newpass){
@@ -820,12 +820,12 @@ function CLASS_game(){
 		if(that.savegame.password === pass){
 			that.savegame.password = md5.digest(newpass);
 			localStorage.setItem("player"+that.savegame.usernumber+"_password", that.savegame.password);
-			return ERR_SUCCESS;//Worked
+			return ERR_SUCCESS;// Worked
 		}
-		return ERR_WRONGPW;//Wrong pass
+		return ERR_WRONGPW;// Wrong pass
 	}
 	
-	//Those calls are on a higher abstraction levels and can be safely used by dialog boxes:
+	// Those calls are on a higher abstraction levels and can be safely used by dialog boxes:
 	this.dbxcall_save = function(uname, pass){
 		var result;
 		if(uname === null || uname == "") {
@@ -876,49 +876,49 @@ function CLASS_game(){
 	}
 	
 	/*//////////////////////////////////////////////////////////////////////////////////////////////////////
-	//ENTITY CLASS
-	//Players, blocks, opponents. Even dummy block, everything of that is in the entity class.
+	// ENTITY CLASS
+	// Players, blocks, opponents. Even dummy block, everything of that is in the entity class.
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
 	
 	function CLASS_entity(){
 	}
 	CLASS_entity.prototype.init = function(a_id){
-		//Public:
+	// Public:
 		this.id = a_id
 		this.moving = false;
 		this.moving_offset = {x: 0, y: 0};
 		this.pushing = false;
 		this.face_dir = DIR_DOWN;
-		this.berti_id = -1;//Multiple bertis are possible, this makes the game engine much more flexible
+		this.berti_id = -1;// Multiple bertis are possible, this makes the game engine much more flexible
 		this.sees_berti = false;
 		this.time_since_noise = 100;
 		this.just_moved = false;
-		this.gets_removed_in = -1;//Removal timer for doors
+		this.gets_removed_in = -1;// Removal timer for doors
 		
 		this.can_push = false;
-		if(this.id == 1 || this.id == 2 || this.id == 5 || this.id == 7){//Those are the guys who can push blocks, Berti, MENU Berti, light block, purple monster
+		if(this.id == 1 || this.id == 2 || this.id == 5 || this.id == 7){// Those are the guys who can push blocks, Berti, MENU Berti, light block, purple monster
 			this.can_push = true;
 		}
 		this.pushable = false;
-		if(this.id == 5 || this.id == 6){//Those are the guys who can be pushed, namely light block and heavy block
+		if(this.id == 5 || this.id == 6){// Those are the guys who can be pushed, namely light block and heavy block
 			this.pushable = true;
 		}
 		this.consumable = false;
-		if(this.id == 4 || (this.id >= 13 && this.id <= 18)){//Those are the guys who are consumable, namely banana and the 6 keys
+		if(this.id == 4 || (this.id >= 13 && this.id <= 18)){// Those are the guys who are consumable, namely banana and the 6 keys
 			this.consumable = true;
 		}
 		this.is_small = false;
-		if(this.id == 1 || this.id == 2 || this.id == 7 || this.id == 10){//Those are small entities, Berti, MENU Berti, purple monster, green monster
-			this.is_small = true;//This is a technical attribute. Small entities can go into occupied, moving places from all directions. Monsters can see through small entities
+		if(this.id == 1 || this.id == 2 || this.id == 7 || this.id == 10){// Those are small entities, Berti, MENU Berti, purple monster, green monster
+			this.is_small = true;// This is a technical attribute. Small entities can go into occupied, moving places from all directions. Monsters can see through small entities
 		}
 		
-		//Purely visual aspects here. No impact on gameplay logic
+		// Purely visual aspects here. No impact on gameplay logic
 		this.animation_frame = -1;
 		this.animation_delay = 0;
 		
 		this.fine_offset_x = 0;
 		this.fine_offset_y = 0;
-		//end visual
+		// end visual
 	}
 	CLASS_entity.prototype.move_randomly = function(curr_x, curr_y){
 		if(!this.moving){
@@ -961,7 +961,7 @@ function CLASS_game(){
 				game.start_move(curr_x, curr_y, back_dir);
 				return;
 			}
-			//Here's the code if that dude can't go anywhere: (none)
+			// Here's the code if that dude can't go anywhere: (none)
 		}
 	}
 	CLASS_entity.prototype.chase_berti = function(curr_x, curr_y){
@@ -979,7 +979,7 @@ function CLASS_game(){
 				(this.face_dir == DIR_RIGHT && game.berti_positions[i].x >= curr_x);
 				
 				if(face_right_direction && game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
-					var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);//Manhattan distance
+					var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);// Manhattan distance
 					if(distance < closest_dist || (distance == closest_dist && Math.random() < 0.50)){
 						closest_dist = distance;
 						closest_berti = i;
@@ -987,10 +987,10 @@ function CLASS_game(){
 				}
 			}
 			
-			if(closest_berti == -1 || Math.random() < 0.02){//Can't see berti OR he randomly gets distracted THEN Random search
+			if(closest_berti == -1 || Math.random() < 0.02){// Can't see berti OR he randomly gets distracted THEN Random search
 				this.sees_berti = false;
 				this.move_randomly(curr_x, curr_y);
-			}else{//Chasing code here.
+			}else{// Chasing code here.
 				if(!this.sees_berti){
 					this.sees_berti = true;
 					
@@ -1007,7 +1007,7 @@ function CLASS_game(){
 				var diff_x = game.berti_positions[closest_berti].x - curr_x;
 				var diff_y = game.berti_positions[closest_berti].y - curr_y;
 				
-				//THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
+				// THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
 				/*var closest_berti_obj = game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y];
 				
 				if(closest_berti_obj.moving){
@@ -1016,19 +1016,19 @@ function CLASS_game(){
 						if(Math.abs(closest_berti_obj.moving_offset.x) + Math.abs(closest_berti_obj.moving_offset.x) >= 15)
 						return;
 					}
-				}*///END OF OPTIONAL FIX
+				}*/// END OF OPTIONAL FIX
 				
 				var dir1;
 				var dir2;
 				
 				if(diff_x == 0){
-					if(diff_y == 0){//This should NEVER happen.
+					if(diff_y == 0){// This should NEVER happen.
 						alert("001: Something went mighty wrong! Blame the programmer!");
 						this.move_randomly(curr_x, curr_y);
 						return;
 					}else if(diff_y > 0){
 						dir1 = dir2 = DIR_DOWN;
-					}else{//diff_y < 0
+					}else{// diff_y < 0
 						dir1 = dir2 = DIR_UP;
 					}
 				}else if(diff_x > 0){
@@ -1037,17 +1037,17 @@ function CLASS_game(){
 					}else if(diff_y > 0){
 						dir1 = DIR_RIGHT;
 						dir2 = DIR_DOWN;
-					}else{//diff_y < 0
+					}else{// diff_y < 0
 						dir1 = DIR_RIGHT
 						dir2 = DIR_UP;
 					}
-				}else{//diff_x < 0
+				}else{// diff_x < 0
 					if(diff_y == 0){
 						dir1 = dir2 = DIR_LEFT;
 					}else if(diff_y > 0){
 						dir1 = DIR_LEFT;
 						dir2 = DIR_DOWN;
-					}else{//diff_y < 0
+					}else{// diff_y < 0
 						dir1 = DIR_LEFT
 						dir2 = DIR_UP;
 					}
@@ -1082,7 +1082,7 @@ function CLASS_game(){
 	}
 	
 	CLASS_entity.prototype.update_entity = function(curr_x, curr_y){
-		this.animation_delay++;//This is an important link between the game logic and animation timing.
+		this.animation_delay++;// This is an important link between the game logic and animation timing.
 		
 		if(this.moving){
 			switch (this.face_dir) {
@@ -1099,7 +1099,7 @@ function CLASS_game(){
 					this.moving_offset.x += game.move_speed;
 					break;
 				default:
-					alert("002: Something went mighty wrong! Blame the programmer!");//This should never be executed
+					alert("002: Something went mighty wrong! Blame the programmer!");// This should never be executed
 					break;
 			}
 			if(this.moving_offset.x <= -24 || this.moving_offset.x >= 24 || this.moving_offset.y <= -24 || this.moving_offset.y >= 24){
@@ -1145,27 +1145,27 @@ function CLASS_game(){
 			}
 		}
 	}
-	//After each update, this function gets called for (every) Berti to see if he was caught!
+	// After each update, this function gets called for (every) Berti to see if he was caught!
 	CLASS_entity.prototype.check_enemy_proximity = function(curr_x, curr_y){
 		
 		if(this.moving_offset.x != 0 || this.moving_offset.y != 0) return;
 		
 		var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
 		for(var i = 0; i < adj_array.length; i++){
-			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){//If there's an opponent on this adjacent tile
+			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){// If there's an opponent on this adjacent tile
 				var enemy_moving_offset_x = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
 				var enemy_moving_offset_y = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
 				if(enemy_moving_offset_x != 0 || enemy_moving_offset_y != 0) continue;
 				
-				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){//If the opponent is diagonally AND
-					//there's an obstacle in the way
+				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){// If the opponent is diagonally AND
+					// there's an obstacle in the way
 					if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0) ||
 						(game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0)){
-						continue;//Don't perform a proximity check for this particular foe.
+						continue;// Don't perform a proximity check for this particular foe.
 					}
 				}
 			
-				//Got caught!
+				// Got caught!
 				game.play_sound(1);
 				game.wait_timer = LEV_STOP_DELAY*UPS;
 				game.level_ended = 2;
@@ -1176,9 +1176,9 @@ function CLASS_game(){
 	}
 
 	/*//////////////////////////////////////////////////////////////////////////////////////////////////////
-	//END OF ENTITY CLASS
-	//GAME CLASS
-	//Core engine, entity class, game ending criteria and much more
+	// END OF ENTITY CLASS
+	// GAME CLASS
+	// Core engine, entity class, game ending criteria and much more
 	//////////////////////////////////////////////////////////////////////////////////////////////////////*/
 	this.move_speed = Math.round(1*60/UPS);
 	this.door_removal_delay = Math.round(8*UPS/60);
@@ -1192,12 +1192,12 @@ function CLASS_game(){
 	this.paused = false;
 	
 	this.update_drawn = false;
-	this.mode = 0;//0 is entry, 1 is menu and play
+	this.mode = 0;// 0 is entry, 1 is menu and play
 	this.level_number = 0;
 	this.level_array = new Array();
 	this.level_unlocked = 0;
-	this.level_ended = 0;//0 is not ended. 1 is won. 2 is died.
-	this.wow = true;//true is WOW!, false is Yeah!
+	this.level_ended = 0;// 0 is not ended. 1 is won. 2 is died.
+	this.wow = true;// true is WOW!, false is Yeah!
 	
 	this.berti_positions;
 	
@@ -1287,19 +1287,19 @@ function CLASS_game(){
 			}
 		}
 	}
-	//Whether you can walk from a tile in a certain direction, boolean
+	// Whether you can walk from a tile in a certain direction, boolean
 	this.walkable = function(curr_x, curr_y, dir){
 		
 		var dst = that.dir_to_coords(curr_x, curr_y, dir);
 		
-		if(!this.is_in_bounds(dst.x, dst.y)){//Can't go out of boundaries
+		if(!this.is_in_bounds(dst.x, dst.y)){// Can't go out of boundaries
 			return false;
 		}
 		
-		if(that.level_array[dst.x][dst.y].id == 0){//Blank space is always walkable
+		if(that.level_array[dst.x][dst.y].id == 0){// Blank space is always walkable
 			return true;
 		}else if(!that.level_array[dst.x][dst.y].moving){
-			if((that.level_array[curr_x][curr_y].id == 1 || that.level_array[curr_x][curr_y].id == 2) && that.level_array[dst.x][dst.y].consumable){//Berti and MENU Berti can pick up items.
+			if((that.level_array[curr_x][curr_y].id == 1 || that.level_array[curr_x][curr_y].id == 2) && that.level_array[dst.x][dst.y].consumable){// Berti and MENU Berti can pick up items.
 				return true;
 			}else{
 				if(that.level_array[curr_x][curr_y].can_push == 1 && that.level_array[dst.x][dst.y].pushable == 1){
@@ -1308,7 +1308,7 @@ function CLASS_game(){
 					return false;
 				}
 			}
-		}else if(that.level_array[dst.x][dst.y].face_dir == dir || (that.level_array[curr_x][curr_y].is_small && that.level_array[dst.x][dst.y].is_small)){//If the block is already moving away in the right direction
+		}else if(that.level_array[dst.x][dst.y].face_dir == dir || (that.level_array[curr_x][curr_y].is_small && that.level_array[dst.x][dst.y].is_small)){// If the block is already moving away in the right direction
 			return true;
 		}else{
 			return false;
@@ -1328,14 +1328,14 @@ function CLASS_game(){
 		}
 		
 		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable){
-			//Om nom nom start
+			// Om nom nom start
 		}else if(that.level_array[dst.x][dst.y].moving){
-			//It's moving out of place by itself, don't do anything
+			// It's moving out of place by itself, don't do anything
 		}else if(that.level_array[dst.x][dst.y].id != 0){
 			that.level_array[src_x][src_y].pushing = true;
 			that.start_move(dst.x, dst.y, dir);
 		}else{
-			that.level_array[dst.x][dst.y].init(-1);//DUMMYBLOCK, invisible and blocks everything.
+			that.level_array[dst.x][dst.y].init(-1);// DUMMYBLOCK, invisible and blocks everything.
 		}
 		
 		vis.update_animation(src_x,src_y);
@@ -1349,7 +1349,7 @@ function CLASS_game(){
 		that.level_array[src_x][src_y].pushing = false;
 		
 		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable){
-			switch (that.level_array[dst.x][dst.y].id) {//Done Om nom nom
+			switch (that.level_array[dst.x][dst.y].id) {// Done Om nom nom
 				case 4:
 					that.num_bananas--;
 					if(that.num_bananas <= 0){
@@ -1357,14 +1357,14 @@ function CLASS_game(){
 						that.level_ended = 1;
 						if(Math.random() < 0.50){
 							game.wow = true;
-							that.play_sound(10);//wow
+							that.play_sound(10);// wow
 						}else{
 							game.wow = false;
-							that.play_sound(11);//yeah
+							that.play_sound(11);// yeah
 						}
 						vis.update_all_animations();
 					}else{
-						that.play_sound(7);//Om nom nom
+						that.play_sound(7);// Om nom nom
 					}
 					break;
 				case 13:
@@ -1391,7 +1391,7 @@ function CLASS_game(){
 			 }
 		}else if(that.level_array[dst.x][dst.y].id != -1 && that.level_array[dst.x][dst.y].id != 0){
 			that.move(dst.x, dst.y, dir);
-		}else if(that.sound){//we need another logic to determine this correctly...DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		}else if(that.sound){// we need another logic to determine this correctly...DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			var dst2 = that.dir_to_coords(dst.x, dst.y, dir);
 			if(	(that.level_array[src_x][src_y].id == 5 || that.level_array[src_x][src_y].id == 6) &&
 				(!that.is_in_bounds(dst2.x, dst2.y) || that.level_array[dst2.x][dst2.y].id == 3)){
@@ -1425,7 +1425,7 @@ function CLASS_game(){
 			that.level_array[src_x][src_y].init(0);
 		}
 		
-		if(that.level_array[dst.x][dst.y].id == 1){//Rectify the position of berti
+		if(that.level_array[dst.x][dst.y].id == 1){// Rectify the position of berti
 			that.berti_positions[that.level_array[dst.x][dst.y].berti_id] = dst;
 		}
 	}
@@ -1473,7 +1473,7 @@ function CLASS_game(){
 		}
 	}
 	
-	this.get_adjacent_tiles = function(tile_x, tile_y){//Potential for optimization
+	this.get_adjacent_tiles = function(tile_x, tile_y){// Potential for optimization
 		//var result; = new Array();
 
 		//if(tile_x-1 >= 0 && tile_y-1 >= 0 && tile_x+1 < LEV_DIMENSION_X && tile_y+1 < LEV_DIMENSION_Y){
@@ -1515,7 +1515,7 @@ function CLASS_game(){
 				walk1_y = 1;
 				walk2_x = 0;
 				walk2_y = 1;
-			}else{//diff_y < 0
+			}else{// diff_y < 0
 				walk1_x = 0;
 				walk1_y = -1;
 				walk2_x = 0;
@@ -1538,13 +1538,13 @@ function CLASS_game(){
 					walk1_y = 1;
 					walk2_x = 1;
 					walk2_y = 1;
-				}else{//diff_y < diff_x
+				}else{// diff_y < diff_x
 					walk1_x = 1;
 					walk1_y = 0;
 					walk2_x = 1;
 					walk2_y = 1;
 				}
-			}else{//diff_y < 0
+			}else{// diff_y < 0
 				if(diff_y*(-1) > diff_x){
 					walk1_x = 0;
 					walk1_y = -1;
@@ -1555,14 +1555,14 @@ function CLASS_game(){
 					walk1_y = -1;
 					walk2_x = 1;
 					walk2_y = -1;
-				}else{//diff_y < diff_x
+				}else{// diff_y < diff_x
 					walk1_x = 1;
 					walk1_y = 0;
 					walk2_x = 1;
 					walk2_y = -1;
 				}
 			}
-		}else{//diff_x < 0
+		}else{// diff_x < 0
 			if(diff_y==0){
 				walk1_x = -1;
 				walk1_y = 0;
@@ -1579,13 +1579,13 @@ function CLASS_game(){
 					walk1_y = 1;
 					walk2_x = -1;
 					walk2_y = 1;
-				}else{//diff_y < diff_x
+				}else{// diff_y < diff_x
 					walk1_x = -1;
 					walk1_y = 0;
 					walk2_x = -1;
 					walk2_y = 1;
 				}
-			}else{//diff_y < 0
+			}else{// diff_y < 0
 				if(diff_y > diff_x){
 					walk1_x = -1;
 					walk1_y = 0;
@@ -1596,7 +1596,7 @@ function CLASS_game(){
 					walk1_y = -1;
 					walk2_x = -1;
 					walk2_y = -1;
-				}else{//diff_y < diff_x
+				}else{// diff_y < diff_x
 					walk1_x = 0;
 					walk1_y = -1;
 					walk2_x = -1;
@@ -1649,7 +1649,7 @@ function CLASS_game(){
 				return false;
 			}
 		}
-		//Code here is unreachable
+		// Code here is unreachable
 	}
 	
 	this.prev_level = function(){
@@ -1667,7 +1667,7 @@ function CLASS_game(){
 			that.buttons_activated[2] = false;
 			return;
 		}
-		that.load_level(that.level_number+1);//Prevent overflow here
+		that.load_level(that.level_number+1);// Prevent overflow here
 		if(that.level_number > that.level_unlocked){
 			that.level_unlocked = that.level_number;
 		}
@@ -1689,7 +1689,7 @@ function CLASS_game(){
 		if(!that.sound) return;
 		if(res.sounds[id].currentTime!=0) res.sounds[id].currentTime=0;
 		res.sounds[id].play();
-		//Useful commands
+		// Useful commands
 		//audioElement.pause();
 		//audioElement.volume=0;
 		//audioElement.src;
@@ -1704,7 +1704,7 @@ function CLASS_game(){
 			vol = 0;
 		}
 		vis.vol_bar.volume = vol;
-		vol = Math.pow(vol, 3);//LOGARITHMIC!
+		vol = Math.pow(vol, 3);// LOGARITHMIC!
 	
 		for(var i = 0; i < res.sounds.length; i++){
 			res.sounds[i].volume = vol;
@@ -1723,9 +1723,9 @@ function CLASS_game(){
 		}
 	}
 	
-	//This is necessary because of mobile browsers. These browsers block sound playback
-	//unless it is triggered by a user input event. Play all sounds at the first input,
-	//then the restriction is lifted for further playbacks.
+	// This is necessary because of mobile browsers. These browsers block sound playback
+	// unless it is triggered by a user input event. Play all sounds at the first input,
+	// then the restriction is lifted for further playbacks.
 	this.remove_soundrestriction = function(){
 		if(that.soundrestriction_removed) return;
 		for(var i = 0; i < res.sounds.length; i++){
@@ -1757,8 +1757,8 @@ function CLASS_game(){
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//VISUAL CLASS
-//Everything in here is related to graphical output. Also, menus and dialog boxes
+// VISUAL CLASS
+// Everything in here is related to graphical output. Also, menus and dialog boxes
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 function CLASS_visual(){
@@ -1773,7 +1773,7 @@ function CLASS_visual(){
 	this.buttons_pressed = new Array();
 	this.buttons_pressed[0] = this.buttons_pressed[1] = this.buttons_pressed[2] = false;
 	
-	//Animations:
+	// Animations:
 	this.offset_key_x = 3;
 	this.offset_key_y = 4;
 	this.offset_banana_x = 4;
@@ -1793,95 +1793,95 @@ function CLASS_visual(){
 			for(var x = 0; x < LEV_DIMENSION_X; x++){
 				var block = game.level_array[x][y];
 				switch (block.id) {
-					case -1://DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
+					case -1:// DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
 						break;
-					case 1://1: Berti (entry point)
-					case 2://2: AUTO Menu Berti
+					case 1:// 1: Berti (entry point)
+					case 2:// 2: AUTO Menu Berti
 						block.animation_frame = 59;
 						break;
-					case 3://Solid block
+					case 3:// Solid block
 						block.animation_frame = 31;
 						break;
-					case 4://Banana
+					case 4:// Banana
 						block.animation_frame = 2;
 						block.fine_offset_x = that.offset_banana_x;
 						block.fine_offset_y = that.offset_banana_y;
 						break;
-					case 5://Light block
+					case 5:// Light block
 						block.animation_frame = 32;
 						break;
-					case 6://Heavy block
+					case 6:// Heavy block
 						block.animation_frame = 33;
 						break;
-					case 7://Purple monster (Monster 2)
+					case 7:// Purple monster (Monster 2)
 						block.animation_frame = 111;
 						break;
 					case 8:
-						//NOTHING
+						// NOTHING
 						break;
 					case 9:
-						//NOTHING
+						// NOTHING
 						break;
-					case 10://Green monster (Monster 2)
+					case 10:// Green monster (Monster 2)
 						block.animation_frame = 147;
 						break;
 					case 11:
-						//NOTHING
+						// NOTHING
 						break;
 					case 12:
-						//NOTHING
+						// NOTHING
 						break;
-					case 13://Key 1
+					case 13:// Key 1
 						block.animation_frame = 3;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 14://Key 2
+					case 14:// Key 2
 						block.animation_frame = 4;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 15://Key 3
+					case 15:// Key 3
 						block.animation_frame = 5;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 16://Key 4
+					case 16:// Key 4
 						block.animation_frame = 6;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 17://Key 5
+					case 17:// Key 5
 						block.animation_frame = 7;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 18://Key 6
+					case 18:// Key 6
 						block.animation_frame = 8;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 19://Door 1
+					case 19:// Door 1
 						block.animation_frame = 41;
 						break;
-					case 20://Door 2
+					case 20:// Door 2
 						block.animation_frame = 44;
 						break;
-					case 21://Door 3
+					case 21:// Door 3
 						block.animation_frame = 47;
 						break;
-					case 22://Door 4
+					case 22:// Door 4
 						block.animation_frame = 50;
 						break;
-					case 23://Door 5
+					case 23:// Door 5
 						block.animation_frame = 53;
 						break;
-					case 24://Door 6
+					case 24:// Door 6
 						block.animation_frame = 56;
 						break;
 				
 					default:
-					//Uh oh, this part should never be executed
+					// Uh oh, this part should never be executed
 					break;
 				}
 			}
@@ -1920,7 +1920,7 @@ function CLASS_visual(){
 									}
 									break;
 								default:
-									//This should never be executed
+									// This should never be executed
 									break;
 							}
 						}else{
@@ -1946,7 +1946,7 @@ function CLASS_visual(){
 									}
 									break;
 								default:
-									//This should never be executed
+									// This should never be executed
 									break;
 							}
 						}
@@ -1959,7 +1959,7 @@ function CLASS_visual(){
 					block.animation_frame = 62;
 				}
 				break;
-			case 7://Purple monster (Monster 2)
+			case 7:// Purple monster (Monster 2)
 				block.fine_offset_x = 0;
 				if(game.level_ended == 0){
 					if(block.moving){
@@ -1987,7 +1987,7 @@ function CLASS_visual(){
 									}
 									break;
 								default:
-									//This should never be executed
+									// This should never be executed
 									break;
 							}
 						}else{
@@ -2013,7 +2013,7 @@ function CLASS_visual(){
 									}
 									break;
 								default:
-									//This should never be executed
+									// This should never be executed
 									break;
 							}
 						}
@@ -2024,7 +2024,7 @@ function CLASS_visual(){
 					block.animation_frame = 111;
 				}
 				break;
-			case 10://Green monster (Monster 2)
+			case 10:// Green monster (Monster 2)
 				block.fine_offset_x = 0;
 				if(game.level_ended == 0){
 					if(block.moving){
@@ -2051,7 +2051,7 @@ function CLASS_visual(){
 								}
 								break;
 							default:
-								//This should never be executed
+								// This should never be executed
 								break;
 						}
 					}else{
@@ -2061,32 +2061,32 @@ function CLASS_visual(){
 					block.animation_frame = 147;
 				}
 				break;
-			case 19://Door 1
+			case 19:// Door 1
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 43-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 20://Door 2
+			case 20:// Door 2
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 46-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 21://Door 3
+			case 21:// Door 3
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 49-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 22://Door 4
+			case 22:// Door 4
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 52-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 23://Door 5
+			case 23:// Door 5
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 55-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 24://Door 6
+			case 24:// Door 6
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 58-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
@@ -2104,7 +2104,7 @@ function CLASS_visual(){
 		}
 	}
 	
-	//Volume bar:
+	// Volume bar:
 	this.vol_bar = new CLASS_vol_bar();
 	
 	function CLASS_vol_bar(){
@@ -2114,16 +2114,16 @@ function CLASS_visual(){
 		this.width = 100;
 		this.volume = DEFAULT_VOLUME;
 		
-		this.colour_1 = {r:0, g:255, b: 0};//Low volume colour: Green
-		this.colour_2 = {r:255, g:0, b: 0};//High volume colour: Red
-		this.colour_3 = {r:255, g:255, b: 255};//Rest of the volume bar: White
-		this.colour_4 = {r:0, g:0, b: 0};//Inbetween bars: Black
+		this.colour_1 = {r:0, g:255, b: 0};// Low volume colour: Green
+		this.colour_2 = {r:255, g:0, b: 0};// High volume colour: Red
+		this.colour_3 = {r:255, g:255, b: 255};// Rest of the volume bar: White
+		this.colour_4 = {r:0, g:0, b: 0};// Inbetween bars: Black
 		
-		this.colour_5 = {r:50, g:50, b:50};//"off" colour, some grey...
+		this.colour_5 = {r:50, g:50, b:50};// "off" colour, some grey...
 	}
 	
 	
-	//Menu stuff:
+	// Menu stuff:
 	this.black = {r:0, g:0, b: 0};
 	this.dark_grey = {r:64, g:64, b:64};
 	this.med_grey = {r:128, g:128, b:128};
@@ -2192,7 +2192,7 @@ function CLASS_visual(){
 		that.menu1 = new CLASS_menu(1, 2, 17, [sub_m1, sub_m2]);
 	}
 	
-	//Dialog box stuff:
+	// Dialog box stuff:
 	
 	function add_button(img, pos_x, pos_y, click_effect){
 		var btn = document.createElement("img");
@@ -2258,7 +2258,7 @@ function CLASS_visual(){
 		txt.type = type;
 		txt.style.position = "absolute";
 		txt.style.left = pos_x+"px";
-		pos_y += 10;//Because of padding
+		pos_y += 10;// Because of padding
 		txt.style.top = pos_y+"px";
 		txt.style.width = width+"px";
 		txt.style.height = height+"px";
@@ -2370,10 +2370,10 @@ function CLASS_visual(){
 				var f_n;
 				var f_c = function(){that.close_dbx();};
 				
-				if(opt == 0){//"New Game"
+				if(opt == 0){// "New Game"
 					f_y = function(){that.open_dbx(DBX_SAVE, 1);};
 					f_n = function(){game.clear_savegame();that.close_dbx();};
-				}else if(opt == 1){//"Load Game" 
+				}else if(opt == 1){// "Load Game" 
 					f_y = function(){that.open_dbx(DBX_SAVE, 2);};
 					f_n = function(){that.open_dbx(DBX_LOAD);};
 				}
@@ -2381,9 +2381,9 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_y;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(183, 20, 100, f_y);//yes
-				add_button(179, 100, 100, f_n);//no
-				add_button(177, 180, 100, f_c);//cancel
+				add_button(183, 20, 100, f_y);// yes
+				add_button(179, 100, 100, f_n);// no
+				add_button(177, 180, 100, f_c);// cancel
 				
 				add_text("Do you want to save the game?", 40, 35);
 				break;
@@ -2404,13 +2404,13 @@ function CLASS_visual(){
 				var f_o;
 				var f_c;
 				
-				if(opt == 0){//"Save game"
+				if(opt == 0){// "Save game"
 					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
 					f_c = function(){that.close_dbx();};
-				}else if(opt == 1){//"New Game" -> yes, save 
+				}else if(opt == 1){// "New Game" -> yes, save 
 					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){game.clear_savegame();that.close_dbx();}};
 					f_c = function(){game.clear_savegame();that.close_dbx();};
-				}else if(opt == 2){//"Load Game" -> yes, save
+				}else if(opt == 2){// "Load Game" -> yes, save
 					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.open_dbx(DBX_LOAD);}};
 					f_c = function(){that.open_dbx(DBX_LOAD);};
 				}
@@ -2418,8 +2418,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);//ok
-				add_button(177, 160, 160, f_c);//cancel
+				add_button(181, 40, 160, f_o);// ok
+				add_button(177, 160, 160, f_c);// cancel
 				
 				add_errfield(20, 85);
 				break;
@@ -2443,8 +2443,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);//ok
-				add_button(177, 160, 160, f_c);//cancel
+				add_button(181, 40, 160, f_o);// ok
+				add_button(177, 160, 160, f_c);// cancel
 				
 				add_errfield(20, 85);
 				break;
@@ -2468,8 +2468,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);//ok
-				add_button(177, 160, 160, f_c);//cancel
+				add_button(181, 40, 160, f_o);// ok
+				add_button(177, 160, 160, f_c);// cancel
 				
 				add_errfield(20, 85);
 				break;
@@ -2490,8 +2490,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 25, 220, f_o);//ok
-				add_button(177, 105, 220, f_c);//cancel
+				add_button(181, 25, 220, f_o);// ok
+				add_button(177, 105, 220, f_c);// cancel
 				
 				add_text("Player name:", 20, 30);
 				if(game.savegame.username === null){
@@ -2547,7 +2547,7 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_o;
 				
-				add_button(181, 125, 300, f_o);//okay
+				add_button(181, 125, 300, f_o);// okay
 				break;
 			default:
 				break;
@@ -2562,7 +2562,7 @@ function CLASS_visual(){
 	this.close_dbx = function(){
 		that.dbx.style.display = "none";
 		
-		//IMPORTANT MEMORY LEAK PREVENTION
+		// IMPORTANT MEMORY LEAK PREVENTION
 		for(var i = that.dbx.arr_btn.length-1; i >= 0; i--){
 			that.dbx.arr_btn[i].pressed = null;
 			that.dbx.arr_btn[i].onmousedown = null;
@@ -2593,14 +2593,14 @@ function CLASS_visual(){
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//UPDATING PROCESS
-//Here, the behaviour of the game is calculated, once per UPS (update per second)
+// UPDATING PROCESS
+// Here, the behaviour of the game is calculated, once per UPS (update per second)
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 var update = function () {
-	if(res.ready()){//All resources loaded
+	if(res.ready()){// All resources loaded
 		if(!game.initialized){
 			game.set_volume(DEFAULT_VOLUME);
-			input.init();//Only init inputs after everything is loaded.
+			input.init();// Only init inputs after everything is loaded.
 			game.play_sound(0);
 			game.initialized = true;
 		}
@@ -2640,18 +2640,18 @@ var update_entities = function(){
 	var tick = (game.update_tick*60/UPS);
 	var synced_move = tick % (12/game.move_speed) == 0;
 	
-	//The player moves first at all times to ensure the best response time and remove directional quirks.
+	// The player moves first at all times to ensure the best response time and remove directional quirks.
 	for(var i = 0; i < game.berti_positions.length; i++){
 		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].register_input(game.berti_positions[i].x, game.berti_positions[i].y, !synced_move);
 	}
 	
 	if(synced_move){
-		//NPC logic and stop walking logic.
+		// NPC logic and stop walking logic.
 		for(var y = 0; y < LEV_DIMENSION_Y; y++){
 			for(var x = 0; x < LEV_DIMENSION_X; x++){
-				if(game.level_array[x][y].id == 2){//MENU Berti
+				if(game.level_array[x][y].id == 2){// MENU Berti
 					game.level_array[x][y].move_randomly(x,y);
-				}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){//Purple and green monster
+				}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){// Purple and green monster
 					game.level_array[x][y].chase_berti(x,y);
 				}
 				
@@ -2663,26 +2663,26 @@ var update_entities = function(){
 		}
 	}
 
-	//After calculating who moves where, the entities actually get updated.
+	// After calculating who moves where, the entities actually get updated.
 	for(var y = 0; y < LEV_DIMENSION_Y; y++){
 		for(var x = 0; x < LEV_DIMENSION_X; x++){
 			game.level_array[x][y].update_entity(x,y);
 		}
 	}
 	
-	//Gameover condition check.
+	// Gameover condition check.
 	for(var i = 0; i < game.berti_positions.length; i++){
 		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].check_enemy_proximity(game.berti_positions[i].x, game.berti_positions[i].y);
 	}
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
-//RENDERING PROCESS
-//All visual things get handled here. Visual variables go into the object "vis".
-//Runs with 60 FPS on average (depending on browser).
+// RENDERING PROCESS
+// All visual things get handled here. Visual variables go into the object "vis".
+// Runs with 60 FPS on average (depending on browser).
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-//Render scene
+// Render scene
 var render = function () {
 	game.now = Date.now();
     var elapsed = game.now - game.then;
@@ -2695,19 +2695,19 @@ var render = function () {
 	//CTX.fillRect(0, 0, SCREEN_WIDTH, MENU_HEIGHT);
 	//CTX.clearRect(0, MENU_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-MENU_HEIGHT);
 	
-	if (game.update_drawn) {//This prevents the game from rendering the same thing twice
+	if (game.update_drawn) {// This prevents the game from rendering the same thing twice
 		window.requestAnimationFrame(render);
 		return;
 	}
 	game.update_drawn = true;
 
 	if (res.ready()) {
-		CTX.drawImage(res.images[0], 0, 0);//Background
-		CTX.drawImage(res.images[9], 22, 41);//Steps
-		CTX.drawImage(res.images[10], 427, 41);//Ladder
+		CTX.drawImage(res.images[0], 0, 0);// Background
+		CTX.drawImage(res.images[9], 22, 41);// Steps
+		CTX.drawImage(res.images[10], 427, 41);// Ladder
 		render_displays();
 		render_buttons();
-		if(game.mode == 0){//Title image
+		if(game.mode == 0){// Title image
 			CTX.drawImage(res.images[1], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 			
 			CTX.fillStyle = "rgb(0, 0, 0)";
@@ -2717,14 +2717,14 @@ var render = function () {
 			CTX.fillText("JavaScript remake by " + AUTHOR, 140, 234);
 		}else if(game.mode == 1){
 			render_field();
-		}else if(game.mode == 2){//Won!
+		}else if(game.mode == 2){// Won!
 			CTX.drawImage(res.images[170], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 		}
 		render_vol_bar();
 		render_menu();
 	}else{
 		CTX.fillStyle = "rgb("+vis.light_grey.r+", "+vis.light_grey.g+", "+vis.light_grey.b+")";
-		CTX.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);//Options box
+		CTX.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);// Options box
 		CTX.fillStyle = "rgb(0, 0, 0)";
 		CTX.font = "36px Helvetica";
 		CTX.textAlign = "center";
@@ -2758,7 +2758,7 @@ function render_fps(){
 
 function render_menu(){
 	var submenu_offset = 0;
-	//The font is the same for the whole menu... Segoe UI is also nice
+	// The font is the same for the whole menu... Segoe UI is also nice
 	CTX.font = "11px Tahoma";
 	CTX.textAlign = "left";
 	CTX.textBaseline = "top";
@@ -2767,23 +2767,23 @@ function render_menu(){
 		var sm = vis.menu1.submenu_list[i];
 		if(i == vis.menu1.submenu_open){
 			CTX.fillStyle = "rgb("+vis.light_grey.r+", "+vis.light_grey.g+", "+vis.light_grey.b+")";
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + 1, sm.dd_width, sm.dd_height);//Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + 1, sm.dd_width, sm.dd_height);// Options box
 		
 			CTX.fillStyle = "rgb("+vis.med_grey.r+", "+vis.med_grey.g+", "+vis.med_grey.b+")";
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y, sm.width, 1);
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y, 1, vis.menu1.height);
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset + sm.dd_width - 2, vis.menu1.offset_y + vis.menu1.height + 2, 1, sm.dd_height - 2);//Options box
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + sm.dd_height - 1, sm.dd_width - 2, 1);//Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset + sm.dd_width - 2, vis.menu1.offset_y + vis.menu1.height + 2, 1, sm.dd_height - 2);// Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + sm.dd_height - 1, sm.dd_width - 2, 1);// Options box
 			
 			CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height, sm.width, 1);
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset + sm.width - 1, vis.menu1.offset_y, 1, vis.menu1.height);
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + 2, 1, sm.dd_height - 3);//Options box
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + 2, sm.dd_width - 3, 1);//Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + 2, 1, sm.dd_height - 3);// Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset + 1, vis.menu1.offset_y + vis.menu1.height + 2, sm.dd_width - 3, 1);// Options box
 			
 			CTX.fillStyle = "rgb("+vis.dark_grey.r+", "+vis.dark_grey.g+", "+vis.dark_grey.b+")";
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset + sm.dd_width - 1, vis.menu1.offset_y + vis.menu1.height + 1, 1, sm.dd_height);//Options box
-			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + sm.dd_height, sm.dd_width - 1, 1);//Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset + sm.dd_width - 1, vis.menu1.offset_y + vis.menu1.height + 1, 1, sm.dd_height);// Options box
+			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + sm.dd_height, sm.dd_width - 1, 1);// Options box
 			
 			//input.mouse_pos.x
 			var option_offset = vis.menu1.offset_y + vis.menu1.height + 4;
@@ -2797,9 +2797,9 @@ function render_menu(){
 					next_offset = option_offset + sm.offset_line;
 					
 					CTX.fillStyle = "rgb("+vis.med_grey.r+", "+vis.med_grey.g+", "+vis.med_grey.b+")";
-					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset + 3, sm.dd_width - 6, 1);//Separator line
+					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset + 3, sm.dd_width - 6, 1);// Separator line
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
-					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset + 4, sm.dd_width - 6, 1);//Separator line
+					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset + 4, sm.dd_width - 6, 1);// Separator line
 					
 				}else{
 					next_offset = option_offset + sm.offset_text;
@@ -2808,7 +2808,7 @@ function render_menu(){
 				if(!sm.options[j].line && input.mouse_pos.x > vis.menu1.offset_x + submenu_offset && input.mouse_pos.x < vis.menu1.offset_x + submenu_offset + sm.dd_width &&
 				input.mouse_pos.y > option_offset && input.mouse_pos.y < next_offset){
 					CTX.fillStyle = "rgb("+vis.blue.r+", "+vis.blue.g+", "+vis.blue.b+")";
-					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset, sm.dd_width - 6, sm.offset_text);//Options box
+					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset, sm.dd_width - 6, sm.offset_text);// Options box
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 					
 					check_image = 172;
@@ -2828,7 +2828,7 @@ function render_menu(){
 				
 				if(sm.options[j].check != 0){
 					if((sm.options[j].effect_id == 3 && game.paused) || (sm.options[j].effect_id == 4 && game.single_steps) || (sm.options[j].effect_id == 5 && game.sound)){
-						CTX.drawImage(res.images[check_image], vis.menu1.offset_x + submenu_offset + 6, option_offset + 6);//Background
+						CTX.drawImage(res.images[check_image], vis.menu1.offset_x + submenu_offset + 6, option_offset + 6);// Background
 					}
 				}
 				
@@ -2873,13 +2873,13 @@ function render_vol_bar(){
 };
 
 function render_field(){
-	render_field_subset(true);//Consumables in the background
-	render_field_subset(false);//The rest in the foreground
+	render_field_subset(true);// Consumables in the background
+	render_field_subset(false);// The rest in the foreground
 	
-	CTX.drawImage(res.images[0], 0, 391, 537, 4, 0, LEV_OFFSET_Y+24*LEV_DIMENSION_Y, 537, 4);//Bottom border covering blocks
-	CTX.drawImage(res.images[0], 520, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y, LEV_OFFSET_X+24*LEV_DIMENSION_X, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y);//Right border covering blocks
+	CTX.drawImage(res.images[0], 0, 391, 537, 4, 0, LEV_OFFSET_Y+24*LEV_DIMENSION_Y, 537, 4);// Bottom border covering blocks
+	CTX.drawImage(res.images[0], 520, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y, LEV_OFFSET_X+24*LEV_DIMENSION_X, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y);// Right border covering blocks
 	
-	if(game.level_ended == 1){//Berti cheering, wow or yeah
+	if(game.level_ended == 1){// Berti cheering, wow or yeah
 		for(var i = 0; i < game.berti_positions.length; i++){
 			if(game.wow){
 				CTX.drawImage(res.images[168],
@@ -2891,7 +2891,7 @@ function render_field(){
 				LEV_OFFSET_Y+24*game.berti_positions[i].y+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.y+vis.offset_yeah_y);
 			}
 		}
-	}else if(game.level_ended == 2){//Berti dies in a pool of blood
+	}else if(game.level_ended == 2){// Berti dies in a pool of blood
 		for(var i = 0; i < game.berti_positions.length; i++){
 			CTX.drawImage(res.images[167],
 			LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_argl_x,
@@ -2941,14 +2941,14 @@ function render_block(x, y, render_option){
 		needs_update = true;
 	}
 	
-	if(game.level_array[x][y].id <= 0) return;//Optimization (empty and dummy block can't be drawn)
+	if(game.level_array[x][y].id <= 0) return;// Optimization (empty and dummy block can't be drawn)
 	
 	if(needs_update)
 	switch (game.level_array[x][y].id) {
 		/*case -1://DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
 			break;*/
-		case 1://1: Berti
-		case 2://2: AUTO Menu Berti
+		case 1:// 1: Berti
+		case 2:// 2: AUTO Menu Berti
 			if(block.animation_frame >= 63 && block.animation_frame < 66){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 66){
@@ -2983,7 +2983,7 @@ function render_block(x, y, render_option){
 				block.animation_frame = 91;
 			}
 			break;
-		case 7://Purple monster (Monster 2)
+		case 7:// Purple monster (Monster 2)
 			if(block.animation_frame >= 111 && block.animation_frame < 114){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 114){
@@ -3022,7 +3022,7 @@ function render_block(x, y, render_option){
 				block.animation_frame = 143;
 			}
 			break;
-		case 10://Green monster (Monster 2)
+		case 10:// Green monster (Monster 2)
 			if(block.animation_frame >= 147 && block.animation_frame < 150){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 150){
@@ -3051,15 +3051,15 @@ function render_block(x, y, render_option){
 	
 	//drawImage reference: context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
 	if(block.animation_frame >= 0){
-		if(render_option == RENDER_FULL){//Render the full block
+		if(render_option == RENDER_FULL){// Render the full block
 			CTX.drawImage(res.images[block.animation_frame], LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y);
-		}else if(render_option == RENDER_TOP){//Render top
+		}else if(render_option == RENDER_TOP){// Render top
 			if(block.face_dir == DIR_DOWN){
 				CTX.drawImage(res.images[block.animation_frame], 0, 0, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y);
 			}else if(block.face_dir == DIR_UP){
 				CTX.drawImage(res.images[block.animation_frame], 0, 0, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y-24, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y-24);
 			}
-		}else if(render_option == RENDER_BOTTOM){//Render bottom
+		}else if(render_option == RENDER_BOTTOM){// Render bottom
 			var imgsize_offset = res.images[block.animation_frame].height - 24;
 		
 			if(block.face_dir == DIR_DOWN){
@@ -3067,7 +3067,7 @@ function render_block(x, y, render_option){
 			}else if(block.face_dir == DIR_UP){
 				CTX.drawImage(res.images[block.animation_frame], 0, -offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height+offset_y, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+block.fine_offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height+offset_y);
 			}
-		}else if(render_option == RENDER_BOTTOM_BORDER){//Render the bottom 4 pixels
+		}else if(render_option == RENDER_BOTTOM_BORDER){// Render the bottom 4 pixels
 			CTX.drawImage(res.images[block.animation_frame], 0, 24, res.images[block.animation_frame].width-4, 4, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y+24, res.images[block.animation_frame].width-4, 4);
 		}
 	}
@@ -3095,26 +3095,26 @@ function render_buttons(){
 	
 	if(game.buttons_activated[0]){
 		if(vis.buttons_pressed[0]){
-			CTX.drawImage(res.images[26], 219, 35);//<< pressed
+			CTX.drawImage(res.images[26], 219, 35);// << pressed
 		}else{
-			CTX.drawImage(res.images[23], 219, 35);//<< up
+			CTX.drawImage(res.images[23], 219, 35);// << up
 		}
 	}else{
-		CTX.drawImage(res.images[29], 219, 35);//<< disabled
+		CTX.drawImage(res.images[29], 219, 35);// << disabled
 	}
 	
 	if(vis.buttons_pressed[1]){
-		CTX.drawImage(res.images[25], 253, 35);//Berti pressed
+		CTX.drawImage(res.images[25], 253, 35);// Berti pressed
 	}else{
 		if(vis.berti_blink_time < 100){
-			CTX.drawImage(res.images[22], 253, 35);//Berti up
+			CTX.drawImage(res.images[22], 253, 35);// Berti up
 			if(vis.berti_blink_time == 0){
 				vis.berti_blink_time = 103;//Math.floor(100+(Math.random()*100)+1);
 			}else{
 				vis.berti_blink_time--;
 			}
 		}else{
-			CTX.drawImage(res.images[28], 253, 35);//Berti up blink
+			CTX.drawImage(res.images[28], 253, 35);// Berti up blink
 			if(vis.berti_blink_time == 100){
 				vis.berti_blink_time = Math.floor((Math.random()*95)+5);
 			}else{
@@ -3125,12 +3125,12 @@ function render_buttons(){
 	
 	if(game.buttons_activated[2]){
 		if(vis.buttons_pressed[2]){
-			CTX.drawImage(res.images[27], 287, 35);//>> pressed
+			CTX.drawImage(res.images[27], 287, 35);// >> pressed
 		}else{
-			CTX.drawImage(res.images[24], 287, 35);//>> up
+			CTX.drawImage(res.images[24], 287, 35);// >> up
 		}
 	}else{
-		CTX.drawImage(res.images[30], 287, 35);//>> disabled
+		CTX.drawImage(res.images[30], 287, 35);// >> disabled
 	}
 
 }
@@ -3162,7 +3162,7 @@ function render_joystick(x, y){
 	var mid_y = JOYSTICK.height/2;
 	
 	JOYCTX.clearRect ( 0 , 0 , JOYSTICK.width, JOYSTICK.height );
-	JOYCTX.globalAlpha = 0.5;//Set joystick half-opaque (1 = opaque, 0 = fully transparent)
+	JOYCTX.globalAlpha = 0.5;// Set joystick half-opaque (1 = opaque, 0 = fully transparent)
 	JOYCTX.beginPath();
 	JOYCTX.arc(mid_x,mid_y,JOYSTICK.width/4+10,0,2*Math.PI);
 	JOYCTX.stroke();
@@ -3174,13 +3174,13 @@ function render_joystick(x, y){
 			y = mid_y + (y-mid_y)/dist*JOYSTICK.width/4;
 		}
 		JOYCTX.beginPath();
-		JOYCTX.arc(x, y, 10, 0,2*Math.PI, false);  // a circle at the start
+		JOYCTX.arc(x, y, 10, 0,2*Math.PI, false);// a circle at the start
 		JOYCTX.fillStyle = "red";
 		JOYCTX.fill();
 	}
 }
 
-//Use window.requestAnimationFrame, get rid of browser differences.
+// Use window.requestAnimationFrame, get rid of browser differences.
 (function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -3206,4 +3206,4 @@ function render_joystick(x, y){
         };
 }());
 
-render();//Render thread
+render();// Render thread
