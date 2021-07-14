@@ -2,7 +2,11 @@
 
 ## What is Banania
 
-Banania is a video game for Windows 3.x that was released in 1992. It was created by the programmer Rüdiger Appel and the comics artist Markuß Golschinski. The game was published by Data Becker, a German company that went out of business in the year 2014. Because of that, the original Pascal source code is most likely lost, as Rüdiger Appel does not have it either.
+Banania is a video game for Windows 3.x that was released in 1992. It was created by the programmer Rüdiger Appel and the comics artist Markuß Golschinski.
+
+![Banania running on Windows 95](/banania_win95.png)
+
+The game was published by Data Becker, a German company that went out of business in the year 2014. Because of that, the original Pascal source code is most likely lost, as Rüdiger Appel does not have it either.
 
 This project aims to recreate Banania in a faithful and pixel-perfect way using JavaScript. The sprites, sounds, level data and game logic have been extracted and reverse-engineered from the originally released binary.
 
