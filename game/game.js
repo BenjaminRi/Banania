@@ -1389,7 +1389,7 @@ function CLASS_game(){
 					alert("003: Something went mighty wrong! Blame the programmer!");
 					break;
 			 }
-		}else if(that.level_array[dst.x][dst.y].id != -1 && that.level_array[dst.x][dst.y].id != 0){
+		}else if(typeof that.level_array[dst.x][dst.y].id != 'undefined' && that.level_array[dst.x][dst.y].id != -1 && that.level_array[dst.x][dst.y].id != 0){
 			that.move(dst.x, dst.y, dir);
 		}else if(that.sound){// we need another logic to determine this correctly...DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			var dst2 = that.dir_to_coords(dst.x, dst.y, dir);
