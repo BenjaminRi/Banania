@@ -1308,7 +1308,19 @@ function CLASS_game(){
 					return false;
 				}
 			}
-		}else if(that.level_array[dst.x][dst.y].face_dir == dir || (that.level_array[curr_x][curr_y].is_small && that.level_array[dst.x][dst.y].is_small)){// If the block is already moving away in the right direction
+		}else if( // (the entity at the destination is moving)
+			that.level_array[dst.x][dst.y].face_dir == dir || // If the entity is already moving away in the right direction or...
+			that.level_array[curr_x][curr_y].is_small && that.level_array[dst.x][dst.y].is_small){ // ...the tile is about to be freed by a small entity
+			
+			var adj_array = that.get_adjacent_tiles_primary(dst.x, dst.y);
+			for(var i = 0; i < adj_array.length; i++){
+				if(that.level_array[adj_array[i].x][adj_array[i].y].moving){
+					var dst2 = that.dir_to_coords(adj_array[i].x, adj_array[i].y, that.level_array[adj_array[i].x][adj_array[i].y].face_dir)
+					if(dst.x == dst2.x && dst.y == dst2.y){ // Someone is already moving into the tile we want to move to
+						return false;
+					}
+				}
+			}
 			return true;
 		}else{
 			return false;
@@ -1492,6 +1504,23 @@ function CLASS_game(){
 			return result;
 		//}
 		
+	}
+	
+	this.get_adjacent_tiles_primary = function(tile_x, tile_y){ // Primary neighborhood (up, down, left, right but no diagonals)
+		var result = new Array();
+		if(that.is_in_bounds(tile_x, tile_y-1)){
+			result.push({x:(tile_x), y:(tile_y-1)});
+		}
+		if(that.is_in_bounds(tile_x, tile_y+1)){
+			result.push({x:(tile_x), y:(tile_y+1)});
+		}
+		if(that.is_in_bounds(tile_x-1, tile_y)){
+			result.push({x:(tile_x-1), y:(tile_y)});
+		}
+		if(that.is_in_bounds(tile_x+1, tile_y)){
+			result.push({x:(tile_x+1), y:(tile_y)});
+		}
+		return result;
 	}
 	
 	this.is_in_bounds = function(tile_x, tile_y){
