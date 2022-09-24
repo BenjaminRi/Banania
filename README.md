@@ -10,9 +10,11 @@ The game was published by Data Becker, a German company that went out of busines
 
 This project aims to recreate Banania in a faithful and pixel-perfect way using JavaScript. The sprites, sounds, level data and game logic have been extracted and reverse-engineered from the originally released binary.
 
-## How to run
+## How to run the game
 
-Open banania.html in your favourite browser. No installation is needed. JavaScript and HTML5 canvas are required.
+You can [play Banania online](https://mental-reverb.com/creations/banania/banania.html) as a port on Benjamin Richner's personal website. The original version can be played online in an emulator or downloaded [from the internet archive](https://archive.org/details/banania).
+
+To run Banania locally, clone this repository and open `banania.html` in your favourite browser. No installation is needed. A browser that supports JavaScript and HTML5 canvas is required.
 
 ## How to play
 
