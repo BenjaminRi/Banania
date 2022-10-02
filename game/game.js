@@ -1831,7 +1831,7 @@ function CLASS_visual(){
 
 	this.berti_blink_time = 0;
 	this.last_rendered = 0;
-	this.fps_delay = 0;
+	this.last_fps_update = 0;
 	this.static_ups = 0;
 	this.static_fps = 0;
 	
@@ -2803,12 +2803,12 @@ let render = function () {
 function render_fps(){
 	let now = Date.now();
 	
-	if(now - vis.fps_delay >= 250){
+	if(now - vis.last_fps_update >= 250){
 		let delta_rendered = now - vis.last_rendered;
 		vis.static_ups = ((1000/game.delta_updated).toFixed(2));
 		vis.static_fps = ((1000/delta_rendered).toFixed(2));
 		
-		vis.fps_delay = now;
+		vis.last_fps_update = now;
 	}
 	
 	CTX.fillStyle = "rgb(255, 0, 0)";
