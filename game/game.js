@@ -2,61 +2,58 @@
 // and therefore the code structure is not very good.
 
 "use strict";
-var DEBUG = false;
-var AUTHOR = "Benjamin";
+const DEBUG = false;
+const AUTHOR = "Benjamin";
 
 // GLOBAL CONSTANTS
-var JOYSTICK_SIZE = 0.4;// In terms of the smaller of the two screen dimensions
-var IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+const JOYSTICK_SIZE = 0.4;// In terms of the smaller of the two screen dimensions
+const IS_TOUCH_DEVICE = true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
 
-var UPS = IS_TOUCH_DEVICE ? 15 : 60;// Reduced framerate on mobile
-var NUM_RESOURCES = 197;
-var IMAGE_DIR = "images/";
-var SOUND_DIR = "sound/";
-var SCREEN_WIDTH = 537;
-var SCREEN_HEIGHT = 408;
-var LEV_OFFSET_X = 16;
-var LEV_OFFSET_Y = 79;
-var LEV_DIMENSION_X = 21;
-var LEV_DIMENSION_Y = 13;
-var MENU_HEIGHT = 20;
-var INTRO_DURATION = 6;// In seconds
-if(DEBUG) INTRO_DURATION = 2;
-var LEV_START_DELAY = 2;
-if(DEBUG) LEV_START_DELAY = 1;
-var LEV_STOP_DELAY = 2;
-if(DEBUG) LEV_STOP_DELAY = 1;
-var ANIMATION_DURATION = Math.round(8*UPS/60);// How many times the game has to render before the image changes
+const UPS = IS_TOUCH_DEVICE ? 15 : 60;// Reduced framerate on mobile
+const NUM_RESOURCES = 197;
+const IMAGE_DIR = "images/";
+const SOUND_DIR = "sound/";
+const SCREEN_WIDTH = 537;
+const SCREEN_HEIGHT = 408;
+const LEV_OFFSET_X = 16;
+const LEV_OFFSET_Y = 79;
+const LEV_DIMENSION_X = 21;
+const LEV_DIMENSION_Y = 13;
+const MENU_HEIGHT = 20;
+const INTRO_DURATION = DEBUG ? 2 : 6;// In seconds
+const LEV_START_DELAY = DEBUG ? 1 : 2;
+const LEV_STOP_DELAY = DEBUG ? 1 : 2;
+const ANIMATION_DURATION = Math.round(8*UPS/60);// How many times the game has to render before the image changes
 
-var DEFAULT_VOLUME = 0.7;
+const DEFAULT_VOLUME = 0.7;
 
-var DIR_NONE = -1;
-var DIR_UP = 0;
-var DIR_LEFT = 1;
-var DIR_DOWN = 2;
-var DIR_RIGHT = 3;
+const DIR_NONE = -1;
+const DIR_UP = 0;
+const DIR_LEFT = 1;
+const DIR_DOWN = 2;
+const DIR_RIGHT = 3;
 
-var RENDER_FULL = 0;
-var RENDER_TOP = 1;
-var RENDER_BOTTOM = 2;
-var RENDER_BOTTOM_BORDER = 3;
+const RENDER_FULL = 0;
+const RENDER_TOP = 1;
+const RENDER_BOTTOM = 2;
+const RENDER_BOTTOM_BORDER = 3;
 
-var DBX_CONFIRM = 0;
-var DBX_SAVE = 1;
-var DBX_LOAD = 2;
-var DBX_CHPASS = 3;
-var DBX_LOADLVL = 4;
-var DBX_CHARTS = 5;
+const DBX_CONFIRM = 0;
+const DBX_SAVE = 1;
+const DBX_LOAD = 2;
+const DBX_CHPASS = 3;
+const DBX_LOADLVL = 4;
+const DBX_CHARTS = 5;
 
-var ERR_SUCCESS = 0;
-var ERR_EXISTS = 1;
-var ERR_NOSAVE = 2;
-var ERR_WRONGPW = 3;
-var ERR_NOTFOUND = 4;
-var ERR_EMPTYNAME = 5;
+const ERR_SUCCESS = 0;
+const ERR_EXISTS = 1;
+const ERR_NOSAVE = 2;
+const ERR_WRONGPW = 3;
+const ERR_NOTFOUND = 4;
+const ERR_EMPTYNAME = 5;
 
 // Check storage
-var HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
+const HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
 
 // Canvas creation
 var CANVAS = document.createElement("canvas");
