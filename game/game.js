@@ -56,8 +56,8 @@ const ERR_EMPTYNAME = 5;
 const HAS_STORAGE = (function(){try {return 'localStorage' in window && window['localStorage'] !== null && window['localStorage'] !== undefined;} catch (e) {return false;}})();
 
 // Canvas creation
-var CANVAS = document.createElement("canvas");
-var CTX = CANVAS.getContext("2d");
+let CANVAS = document.createElement("canvas");
+let CTX = CANVAS.getContext("2d");
 CANVAS.width = SCREEN_WIDTH;
 CANVAS.height = SCREEN_HEIGHT;
 CANVAS.true_width = SCREEN_WIDTH;
@@ -65,21 +65,21 @@ CANVAS.true_height = SCREEN_HEIGHT;
 CANVAS.className = "canv";
 document.body.appendChild(CANVAS);
 
-var JOYSTICK;
-var JOYCTX;
+let JOYSTICK;
+let JOYCTX;
 if(IS_TOUCH_DEVICE){
 	// Joystick creation
 	JOYSTICK = document.createElement("canvas");
 	JOYCTX = JOYSTICK.getContext("2d");
-	var mindim = Math.min(window.innerWidth, window.innerHeight);
+	let mindim = Math.min(window.innerWidth, window.innerHeight);
 	JOYSTICK.width = mindim*JOYSTICK_SIZE;
 	JOYSTICK.height = mindim*JOYSTICK_SIZE;
 	JOYSTICK.className = "joystick";
 	document.body.appendChild(JOYSTICK);
 
 	window.onresize = function(event) {// On mobile, make game fullscreen
-		var ratio_1 = window.innerWidth/CANVAS.true_width;
-		var ratio_2 = window.innerHeight/CANVAS.true_height;
+		let ratio_1 = window.innerWidth/CANVAS.true_width;
+		let ratio_2 = window.innerHeight/CANVAS.true_height;
 		if(ratio_1 < ratio_2){
 			CANVAS.style.height = "";
 			CANVAS.style.width = "100%";
@@ -88,13 +88,13 @@ if(IS_TOUCH_DEVICE){
 			CANVAS.style.width = "";
 		}
 		
-		var rect = CANVAS.getBoundingClientRect();
-		var style = window.getComputedStyle(CANVAS);
+		let rect = CANVAS.getBoundingClientRect();
+		let style = window.getComputedStyle(CANVAS);
 		CANVAS.true_width = rect.width + parseInt(style.getPropertyValue('border-left-width')) +parseInt(style.getPropertyValue('border-right-width'));
 		CANVAS.true_height = rect.height + parseInt(style.getPropertyValue('border-top-width')) +parseInt(style.getPropertyValue('border-bottom-width'));
 		
 			
-		var mindim = Math.min(window.innerWidth, window.innerHeight);
+		let mindim = Math.min(window.innerWidth, window.innerHeight);
 		JOYSTICK.width = mindim*JOYSTICK_SIZE;
 		JOYSTICK.height = mindim*JOYSTICK_SIZE;
 		
@@ -107,20 +107,20 @@ if(IS_TOUCH_DEVICE){
 // GLOBAL VARIABLES
 
 // MD5 digest for passwords
-var md5 = new CLASS_md5();
+let md5 = new CLASS_md5();
 
 // Game
-var game = new CLASS_game();
+let game = new CLASS_game();
 
 // Resources
-var res = new CLASS_resources();
+let res = new CLASS_resources();
 res.load();
 
 // Input mechanics
-var input = new CLASS_input();
+let input = new CLASS_input();
 
 // Visual
-var vis = new CLASS_visual();
+let vis = new CLASS_visual();
 vis.init_menus();
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,9 +130,9 @@ vis.init_menus();
 
 function CLASS_resources(){
 // Private:
-	var that = this;
-	var resources_loaded = 0;
-	var already_loading = false;
+	let that = this;
+	let resources_loaded = 0;
+	let already_loading = false;
 	
 	function on_loaded(){
 		resources_loaded++;
@@ -163,27 +163,27 @@ function CLASS_resources(){
 		that.images[1].onload = on_loaded();
 		that.images[1].src = IMAGE_DIR+"entry.png";
 
-		for(var i = 0; i < 9; i++){// From 2 to 10 garbage
+		for(let i = 0; i < 9; i++){// From 2 to 10 garbage
 			that.images[2+i] = new Image();
 			that.images[2+i].onload = on_loaded();
 			that.images[2+i].src = IMAGE_DIR+"garbage_"+i+".png";
 		}
 
-		for(var i = 0; i < 11; i++){// From 11 to 21 digits
+		for(let i = 0; i < 11; i++){// From 11 to 21 digits
 			that.images[11+i] = new Image();
 			that.images[11+i].onload = on_loaded();
 			that.images[11+i].src = IMAGE_DIR+"digits_"+i+".png";
 		}
 
-		for(var i = 0; i < 3; i++){// From 22 to 30 buttons
-			for(var j = 0; j < 3; j++){
+		for(let i = 0; i < 3; i++){// From 22 to 30 buttons
+			for(let j = 0; j < 3; j++){
 				that.images[22+3*i+j] = new Image();
 				that.images[22+3*i+j].onload = on_loaded();
 				that.images[22+3*i+j].src = IMAGE_DIR+"userbutton_"+i+"-"+j+".png";
 			}
 		}
 
-		for(var i = 0; i < 9; i++){// From 31 to 38 stones
+		for(let i = 0; i < 9; i++){// From 31 to 38 stones
 			that.images[31+i] = new Image();
 			that.images[31+i].onload = on_loaded();
 			that.images[31+i].src = IMAGE_DIR+"stone_"+i+".png";
@@ -191,32 +191,32 @@ function CLASS_resources(){
 		
 		// Numbers 39 and 40 contain no images due to a miscalculation
 
-		for(var i = 0; i < 6; i++){// From 41 to 58 doors
-			for(var j = 0; j < 3; j++){// Reversed order for ease of access
+		for(let i = 0; i < 6; i++){// From 41 to 58 doors
+			for(let j = 0; j < 3; j++){// Reversed order for ease of access
 				that.images[41+3*i+j] = new Image();
 				that.images[41+3*i+j].onload = on_loaded();
 				that.images[41+3*i+j].src = IMAGE_DIR+"doors_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 13; i++){// From 59 to 110 player (berti)
-			for(var j = 0; j < 4; j++){// Reversed order for ease of access
+		for(let i = 0; i < 13; i++){// From 59 to 110 player (berti)
+			for(let j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[59+4*i+j] = new Image();
 				that.images[59+4*i+j].onload = on_loaded();
 				that.images[59+4*i+j].src = IMAGE_DIR+"player_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 9; i++){// From 111 to 146 monster 1(purple)
-			for(var j = 0; j < 4; j++){// Reversed order for ease of access
+		for(let i = 0; i < 9; i++){// From 111 to 146 monster 1(purple)
+			for(let j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[111+4*i+j] = new Image();
 				that.images[111+4*i+j].onload = on_loaded();
 				that.images[111+4*i+j].src = IMAGE_DIR+"monster1_"+j+"-"+i+".png";
 			}
 		}
 
-		for(var i = 0; i < 5; i++){// From 147 to 166 monster 2(green)
-			for(var j = 0; j < 4; j++){// Reversed order for ease of access
+		for(let i = 0; i < 5; i++){// From 147 to 166 monster 2(green)
+			for(let j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[147+4*i+j] = new Image();
 				that.images[147+4*i+j].onload = on_loaded();
 				that.images[147+4*i+j].src = IMAGE_DIR+"monster2_"+j+"-"+i+".png";
@@ -299,7 +299,7 @@ function CLASS_resources(){
 		// Sounds: /////////////////////////////////////////////
 		////////////////////////////////////////////////////////
 		
-		var soundarray = [
+		let soundarray = [
 		"about.mp3",
 		"argl.mp3",
 		"attack1.mp3",
@@ -313,7 +313,7 @@ function CLASS_resources(){
 		"wow.mp3",
 		"yeah.mp3"];
 		
-		for(var i = 0; i < soundarray.length; i++){
+		for(let i = 0; i < soundarray.length; i++){
 			that.sounds[i] = new Audio();
 			that.sounds[i].oncanplaythrough = on_loaded();
 			that.sounds[i].src = SOUND_DIR+soundarray[i];
@@ -337,7 +337,7 @@ function CLASS_resources(){
 
 function CLASS_input(){
 // Private:
-	var that = this;
+	let that = this;
 	
 	function handle_keydown_global(evt) {
 		game.remove_soundrestriction();
@@ -369,8 +369,8 @@ function CLASS_input(){
 		that.mouse_pos_global =  {x: evt.clientX, y: evt.clientY};
 		if(vis !== null && vis.dbx !== null && vis.dbx.style.display != "none"){
 			if(vis.dbx.drag){
-				var temp_x = (that.mouse_pos_global.x-vis.dbx.drag_pos.x);
-				var temp_y = (that.mouse_pos_global.y-vis.dbx.drag_pos.y);
+				let temp_x = (that.mouse_pos_global.x-vis.dbx.drag_pos.x);
+				let temp_y = (that.mouse_pos_global.y-vis.dbx.drag_pos.y);
 				if(temp_x < 0) temp_x = 0;
 				if(temp_y < 0) temp_y = 0;
 				
@@ -384,7 +384,7 @@ function CLASS_input(){
 		game.remove_soundrestriction();
 		that.mouse_down = true;
 		if(vis !== null && vis.dbx !== null && vis.dbx.style.display != "none"){
-			var rel_pos = {x:that.mouse_pos_global.x - parseInt(vis.dbx.style.left), y:that.mouse_pos_global.y - parseInt(vis.dbx.style.top)};
+			let rel_pos = {x:that.mouse_pos_global.x - parseInt(vis.dbx.style.left), y:that.mouse_pos_global.y - parseInt(vis.dbx.style.top)};
 			if(rel_pos.x > 0 && rel_pos.x < parseInt(vis.dbx.style.width) && rel_pos.y > 0 && rel_pos.y < 20){
 				evt.preventDefault();// Prevents from selecting the canvas
 				vis.dbx.drag = true;
@@ -401,8 +401,8 @@ function CLASS_input(){
 	};
 		
 	function handle_mousemove(evt) {
-		var rect = CANVAS.getBoundingClientRect();
-		var style = window.getComputedStyle(CANVAS);
+		let rect = CANVAS.getBoundingClientRect();
+		let style = window.getComputedStyle(CANVAS);
 		that.mouse_pos =  {
 			x: Math.round((evt.clientX - rect.left - parseInt(style.getPropertyValue('border-left-width')))/CANVAS.true_width*CANVAS.width),
 			y: Math.round((evt.clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')))/CANVAS.true_height*CANVAS.height)
@@ -446,7 +446,7 @@ function CLASS_input(){
 				vis.menu1.submenu_open = -1;
 			}
 		}else{
-			var menubutton_pressed = false;
+			let menubutton_pressed = false;
 			
 			if(that.menu_pressed != -1){
 				that.lastklick_option = calc_option(vis.menu1, that.mouse_pos.x, that.mouse_pos.y);
@@ -478,7 +478,7 @@ function CLASS_input(){
 		}
 		
 		if(that.menu_pressed == 0 && that.lastklick_option !== null && !that.lastklick_option.line){
-			var up_option = calc_option(vis.menu1, that.mouse_pos.x, that.mouse_pos.y);
+			let up_option = calc_option(vis.menu1, that.mouse_pos.x, that.mouse_pos.y);
 			if(up_option === that.lastklick_option && that.lastklick_option.on()){
 				switch(that.lastklick_option.effect_id){
 					case 0:
@@ -545,8 +545,8 @@ function CLASS_input(){
 			return;
 		}
 		
-		var submenu_offset = 0;
-		for(var i = 0; i < a_menu.submenu_list.length; i++){
+		let submenu_offset = 0;
+		for(let i = 0; i < a_menu.submenu_list.length; i++){
 			submenu_offset += a_menu.submenu_list[i].width;
 			if(mouse_x < a_menu.offset_x + submenu_offset){
 				a_menu.submenu_open = i;
@@ -557,13 +557,13 @@ function CLASS_input(){
 	
 	function calc_option(a_menu, mouse_x, mouse_y){
 		if(a_menu.submenu_open != -1){
-			var submenu_offset = 0;
-			for(var i = 0; i < a_menu.submenu_list.length; i++){
-				var sm = a_menu.submenu_list[i];
+			let submenu_offset = 0;
+			for(let i = 0; i < a_menu.submenu_list.length; i++){
+				let sm = a_menu.submenu_list[i];
 				if(i == a_menu.submenu_open){
-					var option_offset = a_menu.offset_y + a_menu.height + 4;
-					for(var j = 0; j < sm.options.length; j++){
-						var next_offset;
+					let option_offset = a_menu.offset_y + a_menu.height + 4;
+					for(let j = 0; j < sm.options.length; j++){
+						let next_offset;
 						if(sm.options[j].line){
 							next_offset = option_offset + sm.offset_line;
 						}else{
@@ -587,18 +587,18 @@ function CLASS_input(){
 	function handle_touch_global(evt){
 		game.remove_soundrestriction();
 		//evt.preventDefault();
-		var touches = evt.changedTouches;
-		var rect = JOYSTICK.getBoundingClientRect();
-		var style = window.getComputedStyle(JOYSTICK);
+		let touches = evt.changedTouches;
+		let rect = JOYSTICK.getBoundingClientRect();
+		let style = window.getComputedStyle(JOYSTICK);
 		
-		var changed = false;
+		let changed = false;
 		
-		var mid_x = JOYSTICK.width/2;
-		var mid_y = JOYSTICK.height/2;
+		let mid_x = JOYSTICK.width/2;
+		let mid_y = JOYSTICK.height/2;
 			
-		for (var i=0; i < touches.length; i++) {
-			var x = Math.round(touches[i].clientX - rect.left - parseInt(style.getPropertyValue('border-left-width')));
-			var y = Math.round(touches[i].clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')));
+		for (let i=0; i < touches.length; i++) {
+			let x = Math.round(touches[i].clientX - rect.left - parseInt(style.getPropertyValue('border-left-width')));
+			let y = Math.round(touches[i].clientY - rect.top - parseInt(style.getPropertyValue('border-top-width')));
 			
 			if(x >= 0 && x <= JOYSTICK.width && y >= 0 && y <= JOYSTICK.height){
 				if(x >= y){
@@ -694,7 +694,7 @@ function CLASS_input(){
 
 function CLASS_game(){
 // Private:
-	var that = this;
+	let that = this;
 	
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -710,7 +710,7 @@ function CLASS_game(){
 		this.progressed = false;
 	
 		this.arr_steps = new Array();
-		for(var i = 1; i <= 50; i++){
+		for(let i = 1; i <= 50; i++){
 			this.arr_steps[i] = 0;
 		}
 	}
@@ -743,13 +743,13 @@ function CLASS_game(){
 			localStorage.setItem("user_count", that.savegame.usernumber+1);
 		}
 		
-		var prefix = "player"+that.savegame.usernumber+"_";
+		let prefix = "player"+that.savegame.usernumber+"_";
 		
 		localStorage.setItem(prefix+"username", that.savegame.username);
 		localStorage.setItem(prefix+"password", that.savegame.password);
 		localStorage.setItem(prefix+"reached_level", that.savegame.reached_level);
 		
-		for(var i = 1; i <= 50; i++){
+		for(let i = 1; i <= 50; i++){
 			localStorage.setItem(prefix+"steps_lv"+i, that.savegame.arr_steps[i]);
 		}
 		
@@ -759,15 +759,15 @@ function CLASS_game(){
 	}
 	
 	this.retrieve_savegame = function(uname, pass){
-		var user_count = localStorage.getItem("user_count");
+		let user_count = localStorage.getItem("user_count");
 		if(user_count === null){
 			return ERR_NOSAVE;// There are no save games
 		}
 		user_count = parseInt(user_count);
 		pass = md5.digest(pass);
 		
-		for(var i = 0; i < user_count; i++){
-			var prefix = "player"+i+"_";
+		for(let i = 0; i < user_count; i++){
+			let prefix = "player"+i+"_";
 			if(localStorage.getItem(prefix+"username") == uname){
 				if(localStorage.getItem(prefix+"password") == pass){
 					that.savegame = new CLASS_savegame();
@@ -775,7 +775,7 @@ function CLASS_game(){
 					that.savegame.username = uname;
 					that.savegame.password = pass;
 					that.savegame.reached_level = parseInt(localStorage.getItem(prefix+"reached_level"));
-					for(var i = 1; i <= 50; i++){
+					for(let i = 1; i <= 50; i++){
 						that.savegame.arr_steps[i] = parseInt(localStorage.getItem(prefix+"steps_lv"+i));
 					}
 					that.savegame.progressed = false;
@@ -797,11 +797,11 @@ function CLASS_game(){
 	}
 	
 	this.name_savegame = function(uname, pass){
-		var user_count = localStorage.getItem("user_count");
+		let user_count = localStorage.getItem("user_count");
 		if(user_count !== null){
 			user_count = parseInt(user_count);
-			for(var i = 0; i < user_count; i++){
-				var prefix = "player"+i+"_";
+			for(let i = 0; i < user_count; i++){
+				let prefix = "player"+i+"_";
 				if(localStorage.getItem(prefix+"username") == uname){
 					return ERR_EXISTS;// Failed already exists
 				}
@@ -824,7 +824,7 @@ function CLASS_game(){
 	
 	// Those calls are on a higher abstraction levels and can be safely used by dialog boxes:
 	this.dbxcall_save = function(uname, pass){
-		var result;
+		let result;
 		if(uname === null || uname == "") {
 			vis.error_dbx(ERR_EMPTYNAME);
 			return false;
@@ -853,7 +853,7 @@ function CLASS_game(){
 			return false;
 		}
 		
-		var result = that.retrieve_savegame(uname, pass);
+		let result = that.retrieve_savegame(uname, pass);
 		if(result != ERR_SUCCESS){
 			vis.error_dbx(result);
 			return false;
@@ -863,7 +863,7 @@ function CLASS_game(){
 	}
 	
 	this.dbxcall_chpass = function(pass, newpass){
-		var result = that.change_password(pass, newpass);
+		let result = that.change_password(pass, newpass);
 		if(result != ERR_SUCCESS){
 			vis.error_dbx(result);
 			return false;
@@ -919,10 +919,10 @@ function CLASS_game(){
 	}
 	CLASS_entity.prototype.move_randomly = function(curr_x, curr_y){
 		if(!this.moving){
-			var tried_forward = false;
-			var back_dir = game.opposite_dir(this.face_dir);
-			var possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
-			for(var i = 0; i < possibilities.length; i++){
+			let tried_forward = false;
+			let back_dir = game.opposite_dir(this.face_dir);
+			let possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
+			for(let i = 0; i < possibilities.length; i++){
 				if(possibilities[i] == this.face_dir || possibilities[i] == back_dir){
 					possibilities.splice(i, 1);
 					i--;
@@ -938,7 +938,7 @@ function CLASS_game(){
 			}
 			
 			while(possibilities.length > 0){
-				var selection = Math.floor(Math.random()*possibilities.length);
+				let selection = Math.floor(Math.random()*possibilities.length);
 				if(game.walkable(curr_x, curr_y, possibilities[selection])){
 					game.start_move(curr_x, curr_y, possibilities[selection]);
 					return;
@@ -965,18 +965,18 @@ function CLASS_game(){
 		if(!this.moving){
 			this.time_since_noise++;
 			
-			var closest_dist = LEV_DIMENSION_X + LEV_DIMENSION_Y + 1;
-			var closest_berti = -1;
+			let closest_dist = LEV_DIMENSION_X + LEV_DIMENSION_Y + 1;
+			let closest_berti = -1;
 			
-			for(var i = 0; i < game.berti_positions.length; i++){
-				var face_right_direction = 
+			for(let i = 0; i < game.berti_positions.length; i++){
+				let face_right_direction = 
 				(this.face_dir == DIR_DOWN && game.berti_positions[i].y >= curr_y) || 
 				(this.face_dir == DIR_UP && game.berti_positions[i].y <= curr_y) || 
 				(this.face_dir == DIR_LEFT && game.berti_positions[i].x <= curr_x) || 
 				(this.face_dir == DIR_RIGHT && game.berti_positions[i].x >= curr_x);
 				
 				if(face_right_direction && game.can_see_tile(curr_x, curr_y, game.berti_positions[i].x, game.berti_positions[i].y)){
-					var distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);// Manhattan distance
+					let distance = Math.abs(game.berti_positions[i].x - curr_x) + Math.abs(game.berti_positions[i].y - curr_y);// Manhattan distance
 					if(distance < closest_dist || (distance == closest_dist && Math.random() < 0.50)){
 						closest_dist = distance;
 						closest_berti = i;
@@ -1001,22 +1001,22 @@ function CLASS_game(){
 					}
 				}
 				
-				var diff_x = game.berti_positions[closest_berti].x - curr_x;
-				var diff_y = game.berti_positions[closest_berti].y - curr_y;
+				let diff_x = game.berti_positions[closest_berti].x - curr_x;
+				let diff_y = game.berti_positions[closest_berti].y - curr_y;
 				
 				// THIS IS AN OPTIONAL FIX THAT MAKES THE GAME MUCH HARDER!
-				/*var closest_berti_obj = game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y];
+				/*let closest_berti_obj = game.level_array[game.berti_positions[closest_berti].x][game.berti_positions[closest_berti].y];
 				
 				if(closest_berti_obj.moving){
-					var next_pos = game.dir_to_coords(game.berti_positions[closest_berti].x, game.berti_positions[closest_berti].y, closest_berti_obj.face_dir);
+					let next_pos = game.dir_to_coords(game.berti_positions[closest_berti].x, game.berti_positions[closest_berti].y, closest_berti_obj.face_dir);
 					if(Math.abs(curr_x - next_pos.x) + Math.abs(curr_y - next_pos.y) == 1){
 						if(Math.abs(closest_berti_obj.moving_offset.x) + Math.abs(closest_berti_obj.moving_offset.x) >= 15)
 						return;
 					}
 				}*/// END OF OPTIONAL FIX
 				
-				var dir1;
-				var dir2;
+				let dir1;
+				let dir2;
 				
 				if(diff_x == 0){
 					if(diff_y == 0){// This should NEVER happen.
@@ -1051,11 +1051,11 @@ function CLASS_game(){
 				}
 				
 				if(dir1 != dir2){
-					var total_distance = Math.abs(diff_x) + Math.abs(diff_y);
-					var percentage_x = Math.abs(diff_x / total_distance);
+					let total_distance = Math.abs(diff_x) + Math.abs(diff_y);
+					let percentage_x = Math.abs(diff_x / total_distance);
 					
 					if(Math.random() >= percentage_x){
-						var swapper = dir1;
+						let swapper = dir1;
 						dir1 = dir2;
 						dir2 = swapper;
 					}
@@ -1107,7 +1107,7 @@ function CLASS_game(){
 		
 		if(this.gets_removed_in == 0){
 			if(this.moving){
-				var dst = game.dir_to_coords(curr_x, curr_y, this.face_dir);
+				let dst = game.dir_to_coords(curr_x, curr_y, this.face_dir);
 				game.level_array[dst.x][dst.y].init(0);
 			}
 			game.level_array[curr_x][curr_y].init(0);
@@ -1147,11 +1147,11 @@ function CLASS_game(){
 		
 		if(this.moving_offset.x != 0 || this.moving_offset.y != 0) return;
 		
-		var adj_array = game.get_adjacent_tiles(curr_x, curr_y);
-		for(var i = 0; i < adj_array.length; i++){
+		let adj_array = game.get_adjacent_tiles(curr_x, curr_y);
+		for(let i = 0; i < adj_array.length; i++){
 			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){// If there's an opponent on this adjacent tile
-				var enemy_moving_offset_x = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
-				var enemy_moving_offset_y = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
+				let enemy_moving_offset_x = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
+				let enemy_moving_offset_y = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
 				if(enemy_moving_offset_x != 0 || enemy_moving_offset_y != 0) continue;
 				
 				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){// If the opponent is diagonally AND
@@ -1245,15 +1245,15 @@ function CLASS_game(){
 			that.buttons_activated[0] = false;
 		}
 		
-		for(var i = 0; i < LEV_DIMENSION_X; i++){
+		for(let i = 0; i < LEV_DIMENSION_X; i++){
 			that.level_array[i] = new Array()
 		}
 		
-		var berti_counter = 0;
+		let berti_counter = 0;
 		that.berti_positions = new Array();
 		
-		for(var y = 0; y < LEV_DIMENSION_Y; y++){
-			for(var x = 0; x < LEV_DIMENSION_X; x++){
+		for(let y = 0; y < LEV_DIMENSION_Y; y++){
+			for(let x = 0; x < LEV_DIMENSION_X; x++){
 				that.level_array[x][y] = new CLASS_entity();
 				that.level_array[x][y].init(res.levels[lev_number][x][y]);
 				
@@ -1276,8 +1276,8 @@ function CLASS_game(){
 	
 	this.remove_door = function(id){
 		that.play_sound(9);
-		for(var y = 0; y < LEV_DIMENSION_Y; y++){
-			for(var x = 0; x < LEV_DIMENSION_X; x++){
+		for(let y = 0; y < LEV_DIMENSION_Y; y++){
+			for(let x = 0; x < LEV_DIMENSION_X; x++){
 				if(that.level_array[x][y].id == id){
 					that.level_array[x][y].gets_removed_in = that.door_removal_delay;
 				}					
@@ -1287,7 +1287,7 @@ function CLASS_game(){
 	// Whether you can walk from a tile in a certain direction, boolean
 	this.walkable = function(curr_x, curr_y, dir){
 		
-		var dst = that.dir_to_coords(curr_x, curr_y, dir);
+		let dst = that.dir_to_coords(curr_x, curr_y, dir);
 		
 		if(!this.is_in_bounds(dst.x, dst.y)){// Can't go out of boundaries
 			return false;
@@ -1309,10 +1309,10 @@ function CLASS_game(){
 			that.level_array[dst.x][dst.y].face_dir == dir || // If the entity is already moving away in the right direction or...
 			that.level_array[curr_x][curr_y].is_small && that.level_array[dst.x][dst.y].is_small){ // ...the tile is about to be freed by a small entity
 			
-			var adj_array = that.get_adjacent_tiles_primary(dst.x, dst.y);
-			for(var i = 0; i < adj_array.length; i++){
+			let adj_array = that.get_adjacent_tiles_primary(dst.x, dst.y);
+			for(let i = 0; i < adj_array.length; i++){
 				if(that.level_array[adj_array[i].x][adj_array[i].y].moving){
-					var dst2 = that.dir_to_coords(adj_array[i].x, adj_array[i].y, that.level_array[adj_array[i].x][adj_array[i].y].face_dir)
+					let dst2 = that.dir_to_coords(adj_array[i].x, adj_array[i].y, that.level_array[adj_array[i].x][adj_array[i].y].face_dir)
 					if(dst.x == dst2.x && dst.y == dst2.y){ // Someone is already moving into the tile we want to move to
 						return false;
 					}
@@ -1326,7 +1326,7 @@ function CLASS_game(){
 	
 	this.start_move = function(src_x, src_y, dir){
 	
-		var dst = that.dir_to_coords(src_x, src_y, dir);
+		let dst = that.dir_to_coords(src_x, src_y, dir);
 		that.level_array[src_x][src_y].moving = true;
 		that.level_array[src_x][src_y].face_dir = dir;
 		
@@ -1352,7 +1352,7 @@ function CLASS_game(){
 	
 	this.move = function(src_x, src_y, dir){
 	
-		var dst = that.dir_to_coords(src_x, src_y, dir);
+		let dst = that.dir_to_coords(src_x, src_y, dir);
 		that.level_array[src_x][src_y].moving = false;
 		that.level_array[src_x][src_y].moving_offset = {x: 0, y: 0};
 		that.level_array[src_x][src_y].pushing = false;
@@ -1401,28 +1401,28 @@ function CLASS_game(){
 		}else if(that.level_array[dst.x][dst.y].id != -1 && that.level_array[dst.x][dst.y].id != 0){
 			that.move(dst.x, dst.y, dir);
 		}else if(that.sound){// we need another logic to determine this correctly...DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			var dst2 = that.dir_to_coords(dst.x, dst.y, dir);
+			let dst2 = that.dir_to_coords(dst.x, dst.y, dir);
 			if(	(that.level_array[src_x][src_y].id == 5 || that.level_array[src_x][src_y].id == 6) &&
 				(!that.is_in_bounds(dst2.x, dst2.y) || that.level_array[dst2.x][dst2.y].id == 3)){
 				that.play_sound(5);
 			}
 		}
-		var swapper = that.level_array[dst.x][dst.y];
+		let swapper = that.level_array[dst.x][dst.y];
 		that.level_array[dst.x][dst.y] = that.level_array[src_x][src_y];
 		that.level_array[src_x][src_y] = swapper;
 		
-		var back_dir = that.opposite_dir(dir);
-		var before_src = that.dir_to_coords(src_x, src_y, back_dir);
+		let back_dir = that.opposite_dir(dir);
+		let before_src = that.dir_to_coords(src_x, src_y, back_dir);
 		
-		var possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
-		for(var i = 0; i < possibilities.length; i++){
+		let possibilities = new Array(DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT);
+		for(let i = 0; i < possibilities.length; i++){
 			if(possibilities[i] == dir || possibilities[i] == back_dir){
 				possibilities.splice(i, 1);
 				i--;
 			}
 		}
-		var before_src2 = that.dir_to_coords(src_x, src_y, possibilities[0]);
-		var before_src3 = that.dir_to_coords(src_x, src_y, possibilities[1]);
+		let before_src2 = that.dir_to_coords(src_x, src_y, possibilities[0]);
+		let before_src3 = that.dir_to_coords(src_x, src_y, possibilities[1]);
 		
 		if(
 		(that.is_in_bounds(before_src.x, before_src.y) && (that.level_array[before_src.x][before_src.y].moving && that.level_array[before_src.x][before_src.y].face_dir == dir)) ||
@@ -1440,8 +1440,8 @@ function CLASS_game(){
 	}
 	
 	this.dir_to_coords = function(curr_x, curr_y, dir){
-		var new_x = curr_x;
-		var new_y = curr_y;
+		let new_x = curr_x;
+		let new_y = curr_y;
 		
 		switch (dir) {
 			case DIR_UP:
@@ -1483,14 +1483,14 @@ function CLASS_game(){
 	}
 	
 	this.get_adjacent_tiles = function(tile_x, tile_y){// Potential for optimization
-		//var result; = new Array();
+		//let result; = new Array();
 
 		//if(tile_x-1 >= 0 && tile_y-1 >= 0 && tile_x+1 < LEV_DIMENSION_X && tile_y+1 < LEV_DIMENSION_Y){
 		//	return new Array({x:tile_x-1, y:tile_y-1}, {x:tile_x-1, y:tile_y}, {x:tile_x-1, y:tile_y+1}, {x:tile_x, y:tile_y-1}, {x:tile_x, y:tile_y+1}, {x:tile_x+1, y:tile_y-1}, {x:tile_x+1, y:tile_y}, {x:tile_x+1, y:tile_y+1});
 		//}else{
-			var result = new Array();
-			for(var i = -1; i <= 1; i++){
-				for(var j = -1; j <= 1; j++){
+			let result = new Array();
+			for(let i = -1; i <= 1; i++){
+				for(let j = -1; j <= 1; j++){
 					if(i != 0 || j != 0){
 						if(that.is_in_bounds(tile_x+i, tile_y+j)){
 							result.push({x:(tile_x+i), y:(tile_y+j)});
@@ -1504,7 +1504,7 @@ function CLASS_game(){
 	}
 	
 	this.get_adjacent_tiles_primary = function(tile_x, tile_y){ // Primary neighborhood (up, down, left, right but no diagonals)
-		var result = new Array();
+		let result = new Array();
 		if(that.is_in_bounds(tile_x, tile_y-1)){
 			result.push({x:(tile_x), y:(tile_y-1)});
 		}
@@ -1525,13 +1525,13 @@ function CLASS_game(){
 	}
 	
 	this.can_see_tile = function(eye_x, eye_y, tile_x, tile_y){
-		var diff_x = tile_x - eye_x;
-		var diff_y = tile_y - eye_y;
+		let diff_x = tile_x - eye_x;
+		let diff_y = tile_y - eye_y;
 		
-		var walk1_x;
-		var walk1_y;
-		var walk2_x;
-		var walk2_y;
+		let walk1_x;
+		let walk1_y;
+		let walk2_x;
+		let walk2_y;
 		
 		if (diff_x==0){
 			if(diff_y==0){
@@ -1632,14 +1632,14 @@ function CLASS_game(){
 		}
 		
 		
-		var x_offset = 0;
-		var y_offset = 0;
-		var x_ratio1;
-		var y_ratio1;
-		var x_ratio2;
-		var y_ratio2;
-		var diff1;
-		var diff2;
+		let x_offset = 0;
+		let y_offset = 0;
+		let x_ratio1;
+		let y_ratio1;
+		let x_ratio2;
+		let y_ratio2;
+		let diff1;
+		let diff2;
 		
 		while(true){
 			if(diff_x != 0){
@@ -1732,7 +1732,7 @@ function CLASS_game(){
 		vis.vol_bar.volume = vol;
 		vol = Math.pow(vol, 3);// LOGARITHMIC!
 	
-		for(var i = 0; i < res.sounds.length; i++){
+		for(let i = 0; i < res.sounds.length; i++){
 			res.sounds[i].volume = vol;
 		}
 	}
@@ -1740,7 +1740,7 @@ function CLASS_game(){
 	this.toggle_sound = function(){
 		if(that.sound){
 			that.sound = false;
-			for(var i = 0; i < res.sounds.length; i++){
+			for(let i = 0; i < res.sounds.length; i++){
 				res.sounds[i].pause();
 				res.sounds[i].currentTime=0
 			}
@@ -1754,7 +1754,7 @@ function CLASS_game(){
 	// then the restriction is lifted for further playbacks.
 	this.remove_soundrestriction = function(){
 		if(that.soundrestriction_removed) return;
-		for(var i = 0; i < res.sounds.length; i++){
+		for(let i = 0; i < res.sounds.length; i++){
 			if(res.sounds[i].paused) {
 				res.sounds[i].play();
 				res.sounds[i].pause();
@@ -1788,7 +1788,7 @@ function CLASS_game(){
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 function CLASS_visual(){
-	var that = this;
+	let that = this;
 
 	this.berti_blink_time = 0;
 	this.last_rendered = 0;
@@ -1815,9 +1815,9 @@ function CLASS_visual(){
 	this.offset_argl_y = -44;
 	
 	this.init_animation = function(){
-		for(var y = 0; y < LEV_DIMENSION_Y; y++){
-			for(var x = 0; x < LEV_DIMENSION_X; x++){
-				var block = game.level_array[x][y];
+		for(let y = 0; y < LEV_DIMENSION_Y; y++){
+			for(let x = 0; x < LEV_DIMENSION_X; x++){
+				let block = game.level_array[x][y];
 				switch (block.id) {
 					case -1:// DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
 						break;
@@ -1915,7 +1915,7 @@ function CLASS_visual(){
 	}
 	
 	this.update_animation = function(x, y){
-		var block = game.level_array[x][y];
+		let block = game.level_array[x][y];
 		switch (block.id) {
 			case 1:
 			case 2:
@@ -2123,8 +2123,8 @@ function CLASS_visual(){
 	}
 	
 	this.update_all_animations = function(){
-		for(var y = 0; y < LEV_DIMENSION_Y; y++){
-			for(var x = 0; x < LEV_DIMENSION_X; x++){
+		for(let y = 0; y < LEV_DIMENSION_Y; y++){
+			for(let x = 0; x < LEV_DIMENSION_X; x++){
 				that.update_animation(x, y);
 			}
 		}
@@ -2164,7 +2164,7 @@ function CLASS_visual(){
 		this.width = 0;
 		this.submenu_open = -1;
 		
-		for(var i = 0; i < a_submenu_list.length; i++){
+		for(let i = 0; i < a_submenu_list.length; i++){
 			this.width += a_submenu_list[i].width
 		}
 		
@@ -2178,7 +2178,7 @@ function CLASS_visual(){
 		
 		this.dd_width = a_dd_width;
 		this.dd_height = 6;
-		for(var i = 0; i < a_arr_options.length; i++){
+		for(let i = 0; i < a_arr_options.length; i++){
 			if(a_arr_options[i].line){
 				this.dd_height += this.offset_line;
 			}else{
@@ -2193,16 +2193,16 @@ function CLASS_visual(){
 	this.menu1;
 
 	this.init_menus = function(){
-		var tautology = function(){return true;};
+		let tautology = function(){return true;};
 	
-		var arr_options1 = [
+		let arr_options1 = [
 		{line:false, check:0, name:"New", hotkey:"F2", effect_id:0, on:tautology},
 		{line:false, check:0, name:"Load Game...", hotkey:"", effect_id:1, on:function(){return HAS_STORAGE;}},
 		{line:false, check:0, name:"Save", hotkey:"", effect_id:2, on:function(){return (game.savegame.progressed && HAS_STORAGE);}},
 		{line:false, check:1, name:"Pause", hotkey:"", effect_id:3, on:tautology}
 		];
 		
-		var arr_options2 = [
+		let arr_options2 = [
 		{line:false, check:1, name:"Single steps", hotkey:"F5", effect_id:4, on:tautology},
 		{line:false, check:1, name:"Sound", hotkey:"", effect_id:5, on:tautology},
 		{line:true, check:0, name:"", hotkey:"", effect_id:-1, on:tautology},
@@ -2212,8 +2212,8 @@ function CLASS_visual(){
 		{line:false, check:0, name:"Charts", hotkey:"", effect_id:8, on:function(){return HAS_STORAGE;}}
 		];
 		
-		var sub_m1 = new CLASS_submenu(43, 100, "Game", arr_options1);
-		var sub_m2 = new CLASS_submenu(55, 150, "Options", arr_options2);
+		let sub_m1 = new CLASS_submenu(43, 100, "Game", arr_options1);
+		let sub_m2 = new CLASS_submenu(55, 150, "Options", arr_options2);
 		
 		that.menu1 = new CLASS_menu(1, 2, 17, [sub_m1, sub_m2]);
 	}
@@ -2221,7 +2221,7 @@ function CLASS_visual(){
 	// Dialog box stuff:
 	
 	function add_button(img, pos_x, pos_y, click_effect){
-		var btn = document.createElement("img");
+		let btn = document.createElement("img");
 		btn.src = res.images[img].src;
 		btn.style.position = "absolute";
 		btn.style.width = res.images[img].width+"px";
@@ -2241,7 +2241,7 @@ function CLASS_visual(){
 	}
 	
 	function add_text(text, pos_x, pos_y){
-		var txt = document.createElement("p");
+		let txt = document.createElement("p");
 		txt.innerHTML = text;
 		txt.style.position = "absolute";
 		txt.style.left = pos_x+"px";
@@ -2252,7 +2252,7 @@ function CLASS_visual(){
 	}
 	
 	function add_number(a_num, pos_x, pos_y, width, height){
-		var num = document.createElement("p");
+		let num = document.createElement("p");
 		num.innerHTML = a_num;
 		num.style.position = "absolute";
 		num.style.left = pos_x+"px";
@@ -2266,7 +2266,7 @@ function CLASS_visual(){
 	}
 	
 	function add_title(text){
-		var txt = document.createElement("p");
+		let txt = document.createElement("p");
 		txt.innerHTML = text;
 		txt.style.position = "absolute";
 		txt.style.left = "5px";
@@ -2279,7 +2279,7 @@ function CLASS_visual(){
 	}
 	
 	function add_input(pos_x, pos_y, width, height, type){
-		var txt = document.createElement("input");
+		let txt = document.createElement("input");
 		//txt.innerHTML = text;
 		txt.type = type;
 		txt.style.position = "absolute";
@@ -2298,11 +2298,11 @@ function CLASS_visual(){
 	}
 	
 	function add_lvlselect(pos_x, pos_y, width, height){
-		var select = document.createElement("select");
+		let select = document.createElement("select");
 		select.size = 2;
 		
 		select.innerHTML = "";
-		for(var i = 1; i < game.savegame.reached_level; i++){
+		for(let i = 1; i < game.savegame.reached_level; i++){
 			select.innerHTML += "<option value=\""+i+"\">\n"+i+", "+game.savegame.arr_steps[i]+"</option>";
 		}
 		if(game.savegame.reached_level <= 50){
@@ -2323,7 +2323,7 @@ function CLASS_visual(){
 	}
 	
 	function add_errfield(pos_x, pos_y){
-		var ef = document.createElement("p");
+		let ef = document.createElement("p");
 		ef.innerHTML = "";
 		ef.style.position = "absolute";
 		ef.style.left = pos_x+"px";
@@ -2354,7 +2354,7 @@ function CLASS_visual(){
 	
 	this.error_dbx = function(errno){
 		if(that.dbx.errfield === null) return;
-		var err_string = "";
+		let err_string = "";
 		switch(errno){
 			case ERR_EXISTS:
 				err_string = "Error - the account already exists.";
@@ -2384,6 +2384,7 @@ function CLASS_visual(){
 	
 		switch(dbx_id){
 			case DBX_CONFIRM:
+			{
 				add_title("Confirm");
 			
 				that.dbx.style.width = "256px";
@@ -2392,9 +2393,9 @@ function CLASS_visual(){
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-154)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[173].src+')';
 				
-				var f_y;
-				var f_n;
-				var f_c = function(){that.close_dbx();};
+				let f_y;
+				let f_n;
+				let f_c = function(){that.close_dbx();};
 				
 				if(opt == 0){// "New Game"
 					f_y = function(){that.open_dbx(DBX_SAVE, 1);};
@@ -2413,7 +2414,9 @@ function CLASS_visual(){
 				
 				add_text("Do you want to save the game?", 40, 35);
 				break;
+			}
 			case DBX_SAVE:
+			{
 				add_title("Save game");
 			
 				that.dbx.style.width = "256px";
@@ -2427,8 +2430,8 @@ function CLASS_visual(){
 				add_text("Password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
 				
-				var f_o;
-				var f_c;
+				let f_o;
+				let f_c;
 				
 				if(opt == 0){// "Save game"
 					f_o = function(){if(game.dbxcall_save(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
@@ -2449,7 +2452,9 @@ function CLASS_visual(){
 				
 				add_errfield(20, 85);
 				break;
+			}
 			case DBX_LOAD:
+			{
 				add_title("Load game");
 			
 				that.dbx.style.width = "256px";
@@ -2463,8 +2468,8 @@ function CLASS_visual(){
 				add_text("Password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
 				
-				var f_o = function(){if(game.dbxcall_load(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
-				var f_c = function(){that.close_dbx();};
+				let f_o = function(){if(game.dbxcall_load(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
+				let f_c = function(){that.close_dbx();};
 				
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
@@ -2474,7 +2479,9 @@ function CLASS_visual(){
 				
 				add_errfield(20, 85);
 				break;
+			}
 			case DBX_CHPASS:
+			{
 				add_title("Change password");
 			
 				that.dbx.style.width = "256px";
@@ -2488,8 +2495,8 @@ function CLASS_visual(){
 				add_text("New password:", 20, 60);
 				add_input(100, 60, 120, 15, "password");
 				
-				var f_o = function(){if(game.dbxcall_chpass(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
-				var f_c = function(){that.close_dbx();};
+				let f_o = function(){if(game.dbxcall_chpass(that.dbx.arr_input[0].value, that.dbx.arr_input[1].value)){that.close_dbx();}};
+				let f_c = function(){that.close_dbx();};
 				
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
@@ -2499,7 +2506,9 @@ function CLASS_visual(){
 				
 				add_errfield(20, 85);
 				break;
+			}
 			case DBX_LOADLVL:
+			{
 				add_title("Load level");
 			
 				that.dbx.style.width = "197px";
@@ -2510,8 +2519,8 @@ function CLASS_visual(){
 				
 				add_lvlselect(20, 80, 158, 109);
 				
-				var f_o = function(){if(parseInt(that.dbx.lvlselect.value) > 0) {game.load_level(parseInt(that.dbx.lvlselect.value)); that.close_dbx();}};
-				var f_c = function(){that.close_dbx();};
+				let f_o = function(){if(parseInt(that.dbx.lvlselect.value) > 0) {game.load_level(parseInt(that.dbx.lvlselect.value)); that.close_dbx();}};
+				let f_c = function(){that.close_dbx();};
 				
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
@@ -2528,9 +2537,10 @@ function CLASS_visual(){
 				
 				add_text("Level, steps:", 20, 50);
 				
-				
 				break;
+			}
 			case DBX_CHARTS:
+			{
 				game.play_sound(4);
 				
 				add_title("Charts");
@@ -2541,14 +2551,14 @@ function CLASS_visual(){
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-346)/2, 0)+"px";
 				that.dbx.style.background = 'url('+res.images[176].src+')';
 				
-				var uc = localStorage.getItem("user_count");
-				var user_arr = new Array();
+				let uc = localStorage.getItem("user_count");
+				let user_arr = new Array();
 				
-				for(var i = 0; i < uc; i++){
-					var prefix = "player"+i+"_";
-					var rl = parseInt(localStorage.getItem(prefix+"reached_level"));
-					var st = 0;
-					for(var j = 1; j < rl; j++){
+				for(let i = 0; i < uc; i++){
+					let prefix = "player"+i+"_";
+					let rl = parseInt(localStorage.getItem(prefix+"reached_level"));
+					let st = 0;
+					for(let j = 1; j < rl; j++){
 						st += parseInt(localStorage.getItem(prefix+"steps_lv"+j));
 					}
 					user_arr[i] = {name: localStorage.getItem(prefix+"username"), reached: rl, steps: st}
@@ -2561,20 +2571,21 @@ function CLASS_visual(){
 				add_text("steps", 100, 37);
 				add_text("name", 150, 37);
 				
-				for(var i = 0; i < uc && i < 10; i++){
+				for(let i = 0; i < uc && i < 10; i++){
 					add_number((i+1), 20, 65+18*i, 20, 20);
 					add_number(user_arr[i].reached, 50, 65+18*i, 30, 20);
 					add_number(user_arr[i].steps, 95, 65+18*i, 40, 20);
 					add_text(user_arr[i].name, 155, 65+18*i);
 				}
 				
-				var f_o = function(){that.close_dbx();};
+				let f_o = function(){that.close_dbx();};
 				
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_o;
 				
 				add_button(181, 125, 300, f_o);// okay
 				break;
+			}
 			default:
 				break;
 		}
@@ -2589,7 +2600,7 @@ function CLASS_visual(){
 		that.dbx.style.display = "none";
 		
 		// IMPORTANT MEMORY LEAK PREVENTION
-		for(var i = that.dbx.arr_btn.length-1; i >= 0; i--){
+		for(let i = that.dbx.arr_btn.length-1; i >= 0; i--){
 			that.dbx.arr_btn[i].pressed = null;
 			that.dbx.arr_btn[i].onmousedown = null;
 			that.dbx.arr_btn[i].onmouseup = null;
@@ -2600,7 +2611,7 @@ function CLASS_visual(){
 		}
 		that.dbx.arr_btn = new Array();
 		
-		for(var i = that.dbx.arr_input.length-1; i >= 0; i--){
+		for(let i = that.dbx.arr_input.length-1; i >= 0; i--){
 			that.dbx.arr_input[i] = null;
 		}
 		that.dbx.arr_input = new Array();
@@ -2622,7 +2633,7 @@ function CLASS_visual(){
 // UPDATING PROCESS
 // Here, the behaviour of the game is calculated, once per UPS (update per second)
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
-var update = function () {
+let update = function () {
 	if(res.ready()){// All resources loaded
 		if(!game.initialized){
 			game.set_volume(DEFAULT_VOLUME);
@@ -2655,26 +2666,26 @@ var update = function () {
 		}
 	}
 	
-	var now = Date.now();
+	let now = Date.now();
 	game.delta_updated = now - game.last_updated;
 	game.last_updated = now;
 	
 	game.update_drawn = false;
 };
 
-var update_entities = function(){
-	var tick = (game.update_tick*60/UPS);
-	var synced_move = tick % (12/game.move_speed) == 0;
+let update_entities = function(){
+	let tick = (game.update_tick*60/UPS);
+	let synced_move = tick % (12/game.move_speed) == 0;
 	
 	// The player moves first at all times to ensure the best response time and remove directional quirks.
-	for(var i = 0; i < game.berti_positions.length; i++){
+	for(let i = 0; i < game.berti_positions.length; i++){
 		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].register_input(game.berti_positions[i].x, game.berti_positions[i].y, !synced_move);
 	}
 	
 	if(synced_move){
 		// NPC logic and stop walking logic.
-		for(var y = 0; y < LEV_DIMENSION_Y; y++){
-			for(var x = 0; x < LEV_DIMENSION_X; x++){
+		for(let y = 0; y < LEV_DIMENSION_Y; y++){
+			for(let x = 0; x < LEV_DIMENSION_X; x++){
 				if(game.level_array[x][y].id == 2){// MENU Berti
 					game.level_array[x][y].move_randomly(x,y);
 				}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){// Purple and green monster
@@ -2690,14 +2701,14 @@ var update_entities = function(){
 	}
 
 	// After calculating who moves where, the entities actually get updated.
-	for(var y = 0; y < LEV_DIMENSION_Y; y++){
-		for(var x = 0; x < LEV_DIMENSION_X; x++){
+	for(let y = 0; y < LEV_DIMENSION_Y; y++){
+		for(let x = 0; x < LEV_DIMENSION_X; x++){
 			game.level_array[x][y].update_entity(x,y);
 		}
 	}
 	
 	// Gameover condition check.
-	for(var i = 0; i < game.berti_positions.length; i++){
+	for(let i = 0; i < game.berti_positions.length; i++){
 		game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].check_enemy_proximity(game.berti_positions[i].x, game.berti_positions[i].y);
 	}
 }
@@ -2709,9 +2720,9 @@ var update_entities = function(){
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 // Render scene
-var render = function () {
+let render = function () {
 	game.now = Date.now();
-    var elapsed = game.now - game.then;
+    let elapsed = game.now - game.then;
 	if (elapsed > game.fpsInterval) {
         game.then = game.now - (elapsed % game.fpsInterval);
 		update();
@@ -2763,10 +2774,10 @@ var render = function () {
 };
 
 function render_fps(){
-	var now = Date.now();
+	let now = Date.now();
 	
 	if(now - vis.fps_delay >= 250){
-		var delta_rendered = now - vis.last_rendered;
+		let delta_rendered = now - vis.last_rendered;
 		vis.static_ups = ((1000/game.delta_updated).toFixed(2));
 		vis.static_fps = ((1000/delta_rendered).toFixed(2));
 		
@@ -2783,14 +2794,14 @@ function render_fps(){
 };
 
 function render_menu(){
-	var submenu_offset = 0;
+	let submenu_offset = 0;
 	// The font is the same for the whole menu... Segoe UI is also nice
 	CTX.font = "11px Tahoma";
 	CTX.textAlign = "left";
 	CTX.textBaseline = "top";
 	
-	for(var i = 0; i < vis.menu1.submenu_list.length; i++){
-		var sm = vis.menu1.submenu_list[i];
+	for(let i = 0; i < vis.menu1.submenu_list.length; i++){
+		let sm = vis.menu1.submenu_list[i];
 		if(i == vis.menu1.submenu_open){
 			CTX.fillStyle = "rgb("+vis.light_grey.r+", "+vis.light_grey.g+", "+vis.light_grey.b+")";
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + 1, sm.dd_width, sm.dd_height);// Options box
@@ -2812,12 +2823,12 @@ function render_menu(){
 			CTX.fillRect(vis.menu1.offset_x + submenu_offset, vis.menu1.offset_y + vis.menu1.height + sm.dd_height, sm.dd_width - 1, 1);// Options box
 			
 			//input.mouse_pos.x
-			var option_offset = vis.menu1.offset_y + vis.menu1.height + 4;
+			let option_offset = vis.menu1.offset_y + vis.menu1.height + 4;
 			CTX.fillStyle = "rgb("+vis.black.r+", "+vis.black.g+", "+vis.black.b+")";
 			
-			for(var j = 0; j < sm.options.length; j++){
-				var next_offset;
-				var check_image = 171;
+			for(let j = 0; j < sm.options.length; j++){
+				let next_offset;
+				let check_image = 171;
 				
 				if(sm.options[j].line){
 					next_offset = option_offset + sm.offset_line;
@@ -2869,22 +2880,22 @@ function render_menu(){
 }
 
 function render_vol_bar(){
-	var vb = vis.vol_bar;
-	var switcher = false;
+	let vb = vis.vol_bar;
+	let switcher = false;
+	let line_height = 0;
 	
-	
-	for(var i = 0; i < vb.width; i+= 1){
+	for(let i = 0; i < vb.width; i+= 1){
 		if(switcher){
 			switcher = false;
 			CTX.fillStyle = "rgb("+vb.colour_4.r+", "+vb.colour_4.g+", "+vb.colour_4.b+")";
 		}else{
 			switcher = true;
-			var ratio2 = i/vb.width;
-			var line_height = Math.round(vb.height*ratio2);
+			let ratio2 = i/vb.width;
+			line_height = Math.round(vb.height*ratio2);
 		
 			if(i < Math.ceil(vb.volume*vb.width)){
 				if(game.sound){
-					var ratio1 = 1-ratio2;
+					let ratio1 = 1-ratio2;
 					CTX.fillStyle = "rgb("+Math.round(vb.colour_1.r*ratio1+vb.colour_2.r*ratio2)+", "+Math.round(vb.colour_1.g*ratio1+vb.colour_2.g*ratio2)+", "+Math.round(vb.colour_1.b*ratio1+vb.colour_2.b*ratio2)+")";
 				}else{
 					CTX.fillStyle = "rgb("+vb.colour_5.r+", "+vb.colour_5.g+", "+vb.colour_5.b+")";
@@ -2906,7 +2917,7 @@ function render_field(){
 	CTX.drawImage(res.images[0], 520, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y, LEV_OFFSET_X+24*LEV_DIMENSION_X, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y);// Right border covering blocks
 	
 	if(game.level_ended == 1){// Berti cheering, wow or yeah
-		for(var i = 0; i < game.berti_positions.length; i++){
+		for(let i = 0; i < game.berti_positions.length; i++){
 			if(game.wow){
 				CTX.drawImage(res.images[168],
 				LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_wow_x,
@@ -2918,7 +2929,7 @@ function render_field(){
 			}
 		}
 	}else if(game.level_ended == 2){// Berti dies in a pool of blood
-		for(var i = 0; i < game.berti_positions.length; i++){
+		for(let i = 0; i < game.berti_positions.length; i++){
 			CTX.drawImage(res.images[167],
 			LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_argl_x,
 			LEV_OFFSET_Y+24*game.berti_positions[i].y+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.y+vis.offset_argl_y);
@@ -2926,9 +2937,9 @@ function render_field(){
 	}
 }
 function render_field_subset(consumable){
-	for(var y = 0; y < LEV_DIMENSION_Y; y++){
-		for(var x = 0; x < LEV_DIMENSION_X; x++){
-			var block = game.level_array[x][y];
+	for(let y = 0; y < LEV_DIMENSION_Y; y++){
+		for(let x = 0; x < LEV_DIMENSION_X; x++){
+			let block = game.level_array[x][y];
 			if(y > 0 && game.level_array[x][y-1].moving && game.level_array[x][y-1].face_dir == DIR_DOWN && game.level_array[x][y-1].consumable == consumable){
 				render_block(x, y-1, RENDER_BOTTOM);
 			}
@@ -2956,12 +2967,12 @@ function render_field_subset(consumable){
 	}
 }
 function render_block(x, y, render_option){
-	var block = game.level_array[x][y];
+	let block = game.level_array[x][y];
 
-	var offset_x = block.moving_offset.x;
-	var offset_y = block.moving_offset.y;
+	let offset_x = block.moving_offset.x;
+	let offset_y = block.moving_offset.y;
 	
-	var needs_update = false;
+	let needs_update = false;
 	while(block.animation_delay >= ANIMATION_DURATION && !block.just_moved){
 		block.animation_delay -= ANIMATION_DURATION;
 		needs_update = true;
@@ -3086,7 +3097,7 @@ function render_block(x, y, render_option){
 				CTX.drawImage(res.images[block.animation_frame], 0, 0, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y-24, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+offset_y+block.fine_offset_y, res.images[block.animation_frame].width, res.images[block.animation_frame].height-offset_y-24);
 			}
 		}else if(render_option == RENDER_BOTTOM){// Render bottom
-			var imgsize_offset = res.images[block.animation_frame].height - 24;
+			let imgsize_offset = res.images[block.animation_frame].height - 24;
 		
 			if(block.face_dir == DIR_DOWN){
 				CTX.drawImage(res.images[block.animation_frame], 0, res.images[block.animation_frame].height-offset_y-imgsize_offset, res.images[block.animation_frame].width, offset_y+imgsize_offset, LEV_OFFSET_X+24*x+offset_x+block.fine_offset_x, LEV_OFFSET_Y+24*y+24+block.fine_offset_y, res.images[block.animation_frame].width, offset_y+imgsize_offset);
@@ -3100,7 +3111,7 @@ function render_block(x, y, render_option){
 }
 
 function render_buttons(){
-	var over_button = false;
+	let over_button = false;
 	if(input.mouse_down){
 		if(input.mouse_pos.y >= 35 && input.mouse_pos.y <= 65){
 			if(input.mouse_pos.x >= 219 && input.mouse_pos.x <= 249 && input.lastclick_button == 0){
@@ -3162,30 +3173,30 @@ function render_buttons(){
 }
 
 function render_displays(){
-	var steps_string = game.steps_taken.toString();
-	var steps_length = Math.min(steps_string.length-1, 4);
+	let steps_string = game.steps_taken.toString();
+	let steps_length = Math.min(steps_string.length-1, 4);
 
-	for(var i = steps_length; i >= 0; i--){
+	for(let i = steps_length; i >= 0; i--){
 		CTX.drawImage(res.images[11+parseInt(steps_string.charAt(i))], 101-(steps_length-i)*13, 41);
 	}
-	for(var i = steps_length+1; i < 5; i++){
+	for(let i = steps_length+1; i < 5; i++){
 		CTX.drawImage(res.images[21], 101-i*13, 41);
 	}
 
-	var level_string = game.level_number.toString();
-	var level_length = Math.min(level_string.length-1, 4);
+	let level_string = game.level_number.toString();
+	let level_length = Math.min(level_string.length-1, 4);
 
-	for(var i = level_length; i >= 0; i--){
+	for(let i = level_length; i >= 0; i--){
 		CTX.drawImage(res.images[11+parseInt(level_string.charAt(i))], 506-(level_length-i)*13, 41);
 	}
-	for(var i = level_length+1; i < 5; i++){
+	for(let i = level_length+1; i < 5; i++){
 		CTX.drawImage(res.images[21], 506-i*13, 41);
 	}
 }
 
 function render_joystick(x, y){
-	var mid_x = JOYSTICK.width/2;
-	var mid_y = JOYSTICK.height/2;
+	let mid_x = JOYSTICK.width/2;
+	let mid_y = JOYSTICK.height/2;
 	
 	JOYCTX.clearRect ( 0 , 0 , JOYSTICK.width, JOYSTICK.height );
 	JOYCTX.globalAlpha = 0.5;// Set joystick half-opaque (1 = opaque, 0 = fully transparent)
@@ -3194,7 +3205,7 @@ function render_joystick(x, y){
 	JOYCTX.stroke();
 	
 	if(typeof x !== 'undefined' && typeof y !== 'undefined'){
-		var dist = Math.sqrt(Math.pow(x-mid_x,2)+Math.pow(y-mid_y,2));
+		let dist = Math.sqrt(Math.pow(x-mid_x,2)+Math.pow(y-mid_y,2));
 		if(dist > JOYSTICK.width/4){
 			x = mid_x + (x-mid_x)/dist*JOYSTICK.width/4;
 			y = mid_y + (y-mid_y)/dist*JOYSTICK.width/4;
@@ -3208,9 +3219,9 @@ function render_joystick(x, y){
 
 // Use window.requestAnimationFrame, get rid of browser differences.
 (function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    let lastTime = 0;
+    let vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
         window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
         window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame']
                                    || window[vendors[x]+'CancelRequestAnimationFrame'];
@@ -3218,9 +3229,9 @@ function render_joystick(x, y){
  
     if (!window.requestAnimationFrame)
         window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+            let currTime = new Date().getTime();
+            let timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            let id = window.setTimeout(function() { callback(currTime + timeToCall); },
               timeToCall);
             lastTime = currTime + timeToCall;
             return id;
