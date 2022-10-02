@@ -619,9 +619,10 @@ function CLASS_input(){
 					}
 				}
 				
-				if(Date.now() - that.last_joystick_render > 15){
+				let now = Date.now();
+				if(now - that.last_joystick_render > 15){
 					render_joystick(x, y);
-					that.last_joystick_render = Date.now();
+					that.last_joystick_render = now;
 				}
 			}
 		}
@@ -1242,7 +1243,7 @@ function CLASS_game(){
 	this.num_bananas = 0;
 	
 	this.last_updated = Date.now();
-	this.delta_updated = Date.now();
+	this.delta_updated = 0;
 	
 	this.buttons_activated = new Array();
 	this.buttons_activated[0] = this.buttons_activated[2] = false;
