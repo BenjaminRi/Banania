@@ -692,6 +692,33 @@ function CLASS_input(){
 // Holds entities and the game itself
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
+const ENT_DUMMY          = -1; // Dummy block (invisible), prevents entities from moving to already occupied squares
+const ENT_EMPTY          =  0; // Empty and unoccupied space
+const ENT_PLAYER_BERTI   =  1; // Berti the garbage man, the entity that is controlled by the player
+const ENT_AUTO_BERTI     =  2; // Berti clones that move automatically, as seen in the intro screen
+const ENT_PINNED_BLOCK   =  3; // Solid, pinned block that cannot be moved
+const ENT_BANANA_PEEL    =  4; // The banana peels which Berti needs to pick up to complete the levels
+const ENT_LIGHT_BLOCK    =  5; // Light blue block with four arrows on it, pushable
+const ENT_HEAVY_BLOCK    =  6; // Dark blue block with diamond shape <> on it, pushable if nothing is behind it
+const ENT_PURPLE_MONSTER =  7; // Purple monster, can push blocks
+const ENT_UNUSED_1       =  8; // Unused
+const ENT_UNUSED_2       =  9; // Unused
+const ENT_GREEN_MONSTER  = 10; // Green monster, cannot push blocks
+const ENT_UNUSED_3       = 11; // Unused
+const ENT_UNUSED_4       = 12; // Unused
+const ENT_KEY_1          = 13; // Key which opens corresponding door
+const ENT_KEY_2          = 14; // Key which opens corresponding door
+const ENT_KEY_3          = 15; // Key which opens corresponding door
+const ENT_KEY_4          = 16; // Key which opens corresponding door
+const ENT_KEY_5          = 17; // Key which opens corresponding door
+const ENT_KEY_6          = 18; // Key which opens corresponding door
+const ENT_DOOR_1         = 19; // Door which is opened by corresponding key
+const ENT_DOOR_2         = 20; // Door which is opened by corresponding key
+const ENT_DOOR_3         = 21; // Door which is opened by corresponding key
+const ENT_DOOR_4         = 22; // Door which is opened by corresponding key
+const ENT_DOOR_5         = 23; // Door which is opened by corresponding key
+const ENT_DOOR_6         = 24; // Door which is opened by corresponding key
+
 function CLASS_game(){
 // Private:
 	let that = this;
@@ -892,21 +919,31 @@ function CLASS_game(){
 		this.just_moved = false;
 		this.gets_removed_in = -1;// Removal timer for doors
 		
-		this.can_push = false;
-		if(this.id == 1 || this.id == 2 || this.id == 5 || this.id == 7){// Those are the guys who can push blocks, Berti, MENU Berti, light block, purple monster
+		if(this.id == ENT_PLAYER_BERTI || this.id == ENT_AUTO_BERTI || this.id == ENT_LIGHT_BLOCK || this.id == ENT_PURPLE_MONSTER){
 			this.can_push = true;
+		}else{
+			this.can_push = false;
 		}
-		this.pushable = false;
-		if(this.id == 5 || this.id == 6){// Those are the guys who can be pushed, namely light block and heavy block
+		
+		if(this.id == ENT_LIGHT_BLOCK || this.id == ENT_HEAVY_BLOCK){
 			this.pushable = true;
+		}else{
+			this.pushable = false;
 		}
-		this.consumable = false;
-		if(this.id == 4 || (this.id >= 13 && this.id <= 18)){// Those are the guys who are consumable, namely banana and the 6 keys
+		
+		if(this.id == ENT_BANANA_PEEL || this.id == ENT_KEY_1 || this.id == ENT_KEY_2 || this.id == ENT_KEY_3 || this.id == ENT_KEY_4 || this.id == ENT_KEY_5 || this.id == ENT_KEY_6){
 			this.consumable = true;
+		}else{
+			this.consumable = false;
 		}
-		this.is_small = false;
-		if(this.id == 1 || this.id == 2 || this.id == 7 || this.id == 10){// Those are small entities, Berti, MENU Berti, purple monster, green monster
-			this.is_small = true;// This is a technical attribute. Small entities can go into occupied, moving places from all directions. Monsters can see through small entities
+		
+		if(this.id == ENT_PLAYER_BERTI || this.id == ENT_AUTO_BERTI || this.id == ENT_PURPLE_MONSTER || this.id == ENT_GREEN_MONSTER){
+			// This is a technical attribute.
+			// Small entities can follow into occupied, moving entities from all directions.
+			// Monsters can see through small entities.
+			this.is_small = true;
+		}else{
+			this.is_small = false;
 		}
 		
 		// Purely visual aspects here. No impact on gameplay logic
@@ -993,9 +1030,9 @@ function CLASS_game(){
 					
 					if(this.time_since_noise > Math.ceil(Math.random()*10)+3){
 						this.time_since_noise = 0;
-						if(this.id == 7){
+						if(this.id == ENT_PURPLE_MONSTER){
 							game.play_sound(2);
-						}else if(this.id == 10){
+						}else if(this.id == ENT_GREEN_MONSTER){
 							game.play_sound(3);
 						}
 					}
@@ -1108,9 +1145,9 @@ function CLASS_game(){
 		if(this.gets_removed_in == 0){
 			if(this.moving){
 				let dst = game.dir_to_coords(curr_x, curr_y, this.face_dir);
-				game.level_array[dst.x][dst.y].init(0);
+				game.level_array[dst.x][dst.y].init(ENT_EMPTY);
 			}
-			game.level_array[curr_x][curr_y].init(0);
+			game.level_array[curr_x][curr_y].init(ENT_EMPTY);
 		}else if(this.gets_removed_in > 0){
 			this.gets_removed_in -= 1;
 			vis.update_animation(curr_x, curr_y);
@@ -1149,15 +1186,15 @@ function CLASS_game(){
 		
 		let adj_array = game.get_adjacent_tiles(curr_x, curr_y);
 		for(let i = 0; i < adj_array.length; i++){
-			if(game.level_array[adj_array[i].x][adj_array[i].y].id == 7 || game.level_array[adj_array[i].x][adj_array[i].y].id == 10){// If there's an opponent on this adjacent tile
+			if(game.level_array[adj_array[i].x][adj_array[i].y].id == ENT_PURPLE_MONSTER || game.level_array[adj_array[i].x][adj_array[i].y].id == ENT_GREEN_MONSTER){// If there's an opponent on this adjacent tile
 				let enemy_moving_offset_x = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.x;
 				let enemy_moving_offset_y = game.level_array[adj_array[i].x][adj_array[i].y].moving_offset.y;
 				if(enemy_moving_offset_x != 0 || enemy_moving_offset_y != 0) continue;
 				
 				if(Math.abs(curr_x - adj_array[i].x) == 1 && Math.abs(curr_y - adj_array[i].y) == 1){// If the opponent is diagonally AND
 					// there's an obstacle in the way
-					if((game.level_array[adj_array[i].x][curr_y].id != -1 && game.level_array[adj_array[i].x][curr_y].id != 0) ||
-						(game.level_array[curr_x][adj_array[i].y].id != -1 && game.level_array[curr_x][adj_array[i].y].id != 0)){
+					if((game.level_array[adj_array[i].x][curr_y].id != ENT_DUMMY && game.level_array[adj_array[i].x][curr_y].id != ENT_EMPTY) ||
+						(game.level_array[curr_x][adj_array[i].y].id != ENT_DUMMY && game.level_array[curr_x][adj_array[i].y].id != ENT_EMPTY)){
 						continue;// Don't perform a proximity check for this particular foe.
 					}
 				}
@@ -1293,10 +1330,12 @@ function CLASS_game(){
 			return false;
 		}
 		
-		if(that.level_array[dst.x][dst.y].id == 0){// Blank space is always walkable
+		if(that.level_array[dst.x][dst.y].id == ENT_EMPTY){
+			// Blank space is always walkable
 			return true;
 		}else if(!that.level_array[dst.x][dst.y].moving){
-			if((that.level_array[curr_x][curr_y].id == 1 || that.level_array[curr_x][curr_y].id == 2) && that.level_array[dst.x][dst.y].consumable){// Berti and MENU Berti can pick up items.
+			if((that.level_array[curr_x][curr_y].id == ENT_PLAYER_BERTI || that.level_array[curr_x][curr_y].id == ENT_AUTO_BERTI) && that.level_array[dst.x][dst.y].consumable){
+				// Can pick up items.
 				return true;
 			}else{
 				if(that.level_array[curr_x][curr_y].can_push == 1 && that.level_array[dst.x][dst.y].pushable == 1){
@@ -1330,21 +1369,21 @@ function CLASS_game(){
 		that.level_array[src_x][src_y].moving = true;
 		that.level_array[src_x][src_y].face_dir = dir;
 		
-		if(that.level_array[src_x][src_y].id == 1){
+		if(that.level_array[src_x][src_y].id == ENT_PLAYER_BERTI){
 			if(that.steps_taken < 99999){
 				that.steps_taken++;
 			}
 		}
 		
-		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable){
+		if((that.level_array[src_x][src_y].id == ENT_PLAYER_BERTI || that.level_array[src_x][src_y].id == ENT_AUTO_BERTI) && that.level_array[dst.x][dst.y].consumable){
 			// Om nom nom start
 		}else if(that.level_array[dst.x][dst.y].moving){
 			// It's moving out of place by itself, don't do anything
-		}else if(that.level_array[dst.x][dst.y].id != 0){
+		}else if(that.level_array[dst.x][dst.y].id != ENT_EMPTY){
 			that.level_array[src_x][src_y].pushing = true;
 			that.start_move(dst.x, dst.y, dir);
 		}else{
-			that.level_array[dst.x][dst.y].init(-1);// DUMMYBLOCK, invisible and blocks everything.
+			that.level_array[dst.x][dst.y].init(ENT_DUMMY); // Reserve square with dummy block
 		}
 		
 		vis.update_animation(src_x,src_y);
@@ -1357,9 +1396,9 @@ function CLASS_game(){
 		that.level_array[src_x][src_y].moving_offset = {x: 0, y: 0};
 		that.level_array[src_x][src_y].pushing = false;
 		
-		if((that.level_array[src_x][src_y].id == 1 || that.level_array[src_x][src_y].id == 2) && that.level_array[dst.x][dst.y].consumable){
+		if((that.level_array[src_x][src_y].id == ENT_PLAYER_BERTI || that.level_array[src_x][src_y].id == ENT_AUTO_BERTI) && that.level_array[dst.x][dst.y].consumable){
 			switch (that.level_array[dst.x][dst.y].id) {// Done Om nom nom
-				case 4:
+				case ENT_BANANA_PEEL:
 					that.num_bananas--;
 					if(that.num_bananas <= 0){
 						that.wait_timer = LEV_STOP_DELAY*UPS;
@@ -1376,34 +1415,34 @@ function CLASS_game(){
 						that.play_sound(7);// Om nom nom
 					}
 					break;
-				case 13:
-					that.remove_door(19);
+				case ENT_KEY_1:
+					that.remove_door(ENT_DOOR_1);
 					break;
-				case 14:
-					that.remove_door(20);
+				case ENT_KEY_2:
+					that.remove_door(ENT_DOOR_2);
 					break;
-				case 15:
-					that.remove_door(21);
+				case ENT_KEY_3:
+					that.remove_door(ENT_DOOR_3);
 					break;
-				case 16:
-					that.remove_door(22);
+				case ENT_KEY_4:
+					that.remove_door(ENT_DOOR_4);
 					break;
-				case 17:
-					that.remove_door(23);
+				case ENT_KEY_5:
+					that.remove_door(ENT_DOOR_5);
 					break;
-				case 18:
-					that.remove_door(24);
+				case ENT_KEY_6:
+					that.remove_door(ENT_DOOR_6);
 					break;
 				default:
 					alert("003: Something went mighty wrong! Blame the programmer!");
 					break;
 			 }
-		}else if(that.level_array[dst.x][dst.y].id != -1 && that.level_array[dst.x][dst.y].id != 0){
+		}else if(that.level_array[dst.x][dst.y].id != ENT_DUMMY && that.level_array[dst.x][dst.y].id != ENT_EMPTY){
 			that.move(dst.x, dst.y, dir);
 		}else if(that.sound){// we need another logic to determine this correctly...DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			let dst2 = that.dir_to_coords(dst.x, dst.y, dir);
-			if(	(that.level_array[src_x][src_y].id == 5 || that.level_array[src_x][src_y].id == 6) &&
-				(!that.is_in_bounds(dst2.x, dst2.y) || that.level_array[dst2.x][dst2.y].id == 3)){
+			if(	(that.level_array[src_x][src_y].id == ENT_LIGHT_BLOCK || that.level_array[src_x][src_y].id == ENT_HEAVY_BLOCK) &&
+				(!that.is_in_bounds(dst2.x, dst2.y) || that.level_array[dst2.x][dst2.y].id == ENT_PINNED_BLOCK)){
 				that.play_sound(5);
 			}
 		}
@@ -1429,12 +1468,12 @@ function CLASS_game(){
 		that.level_array[dst.x][dst.y].is_small && ((that.is_in_bounds(before_src2.x, before_src2.y) && (that.level_array[before_src2.x][before_src2.y].is_small &&  that.level_array[before_src2.x][before_src2.y].moving && that.level_array[before_src2.x][before_src2.y].face_dir == possibilities[1])) ||
 		(that.is_in_bounds(before_src3.x, before_src3.y) && (that.level_array[before_src3.x][before_src3.y].is_small &&  that.level_array[before_src3.x][before_src3.y].moving && that.level_array[before_src3.x][before_src3.y].face_dir == possibilities[0])))
 		){
-			that.level_array[src_x][src_y].init(-1);
+			that.level_array[src_x][src_y].init(ENT_DUMMY);
 		}else{		
-			that.level_array[src_x][src_y].init(0);
+			that.level_array[src_x][src_y].init(ENT_EMPTY);
 		}
 		
-		if(that.level_array[dst.x][dst.y].id == 1){// Rectify the position of berti
+		if(that.level_array[dst.x][dst.y].id == ENT_PLAYER_BERTI){// Rectify the position of Berti
 			that.berti_positions[that.level_array[dst.x][dst.y].berti_id] = dst;
 		}
 	}
@@ -1671,7 +1710,7 @@ function CLASS_game(){
 			if(x_offset == diff_x && y_offset == diff_y){
 				return true;
 			}
-			if(game.level_array[eye_x + x_offset][eye_y + y_offset].id != 0 && game.level_array[eye_x + x_offset][eye_y + y_offset].id != -1 && !game.level_array[eye_x + x_offset][eye_y + y_offset].is_small){
+			if(game.level_array[eye_x + x_offset][eye_y + y_offset].id != ENT_EMPTY && game.level_array[eye_x + x_offset][eye_y + y_offset].id != ENT_DUMMY && !game.level_array[eye_x + x_offset][eye_y + y_offset].is_small){
 				return false;
 			}
 		}
@@ -1819,96 +1858,84 @@ function CLASS_visual(){
 			for(let x = 0; x < LEV_DIMENSION_X; x++){
 				let block = game.level_array[x][y];
 				switch (block.id) {
-					case -1:// DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
+					case ENT_DUMMY:
 						break;
-					case 1:// 1: Berti (entry point)
-					case 2:// 2: AUTO Menu Berti
+					case ENT_PLAYER_BERTI:
+					case ENT_AUTO_BERTI:
 						block.animation_frame = 59;
 						break;
-					case 3:// Solid block
+					case ENT_PINNED_BLOCK:
 						block.animation_frame = 31;
 						break;
-					case 4:// Banana
+					case ENT_BANANA_PEEL:
 						block.animation_frame = 2;
 						block.fine_offset_x = that.offset_banana_x;
 						block.fine_offset_y = that.offset_banana_y;
 						break;
-					case 5:// Light block
+					case ENT_LIGHT_BLOCK:
 						block.animation_frame = 32;
 						break;
-					case 6:// Heavy block
+					case ENT_HEAVY_BLOCK:
 						block.animation_frame = 33;
 						break;
-					case 7:// Purple monster (Monster 2)
+					case ENT_PURPLE_MONSTER:
 						block.animation_frame = 111;
 						break;
-					case 8:
-						// NOTHING
-						break;
-					case 9:
-						// NOTHING
-						break;
-					case 10:// Green monster (Monster 2)
+					case ENT_GREEN_MONSTER:
 						block.animation_frame = 147;
 						break;
-					case 11:
-						// NOTHING
-						break;
-					case 12:
-						// NOTHING
-						break;
-					case 13:// Key 1
+					case ENT_KEY_1:
 						block.animation_frame = 3;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 14:// Key 2
+					case ENT_KEY_2:
 						block.animation_frame = 4;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 15:// Key 3
+					case ENT_KEY_3:
 						block.animation_frame = 5;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 16:// Key 4
+					case ENT_KEY_4:
 						block.animation_frame = 6;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 17:// Key 5
+					case ENT_KEY_5:
 						block.animation_frame = 7;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 18:// Key 6
+					case ENT_KEY_6:
 						block.animation_frame = 8;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
-					case 19:// Door 1
+					case ENT_DOOR_1:
 						block.animation_frame = 41;
 						break;
-					case 20:// Door 2
+					case ENT_DOOR_2:
 						block.animation_frame = 44;
 						break;
-					case 21:// Door 3
+					case ENT_DOOR_3:
 						block.animation_frame = 47;
 						break;
-					case 22:// Door 4
+					case ENT_DOOR_4:
 						block.animation_frame = 50;
 						break;
-					case 23:// Door 5
+					case ENT_DOOR_5:
 						block.animation_frame = 53;
 						break;
-					case 24:// Door 6
+					case ENT_DOOR_6:
 						block.animation_frame = 56;
 						break;
 				
 					default:
-					// Uh oh, this part should never be executed
-					break;
+						// Uh oh, this part should never be executed
+						break;
 				}
 			}
 		}
@@ -1917,8 +1944,8 @@ function CLASS_visual(){
 	this.update_animation = function(x, y){
 		let block = game.level_array[x][y];
 		switch (block.id) {
-			case 1:
-			case 2:
+			case ENT_PLAYER_BERTI:
+			case ENT_AUTO_BERTI:
 				block.fine_offset_x = 0;
 				if(game.level_ended == 0){
 					if(block.moving){
@@ -1985,7 +2012,7 @@ function CLASS_visual(){
 					block.animation_frame = 62;
 				}
 				break;
-			case 7:// Purple monster (Monster 2)
+			case ENT_PURPLE_MONSTER:
 				block.fine_offset_x = 0;
 				if(game.level_ended == 0){
 					if(block.moving){
@@ -2050,7 +2077,7 @@ function CLASS_visual(){
 					block.animation_frame = 111;
 				}
 				break;
-			case 10:// Green monster (Monster 2)
+			case ENT_GREEN_MONSTER:
 				block.fine_offset_x = 0;
 				if(game.level_ended == 0){
 					if(block.moving){
@@ -2087,32 +2114,32 @@ function CLASS_visual(){
 					block.animation_frame = 147;
 				}
 				break;
-			case 19:// Door 1
+			case ENT_DOOR_1:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 43-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 20:// Door 2
+			case ENT_DOOR_2:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 46-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 21:// Door 3
+			case ENT_DOOR_3:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 49-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 22:// Door 4
+			case ENT_DOOR_4:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 52-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 23:// Door 5
+			case ENT_DOOR_5:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 55-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
-			case 24:// Door 6
+			case ENT_DOOR_6:
 				if(block.gets_removed_in >= 0){
 					block.animation_frame = 58-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
@@ -2686,9 +2713,9 @@ let update_entities = function(){
 		// NPC logic and stop walking logic.
 		for(let y = 0; y < LEV_DIMENSION_Y; y++){
 			for(let x = 0; x < LEV_DIMENSION_X; x++){
-				if(game.level_array[x][y].id == 2){// MENU Berti
+				if(game.level_array[x][y].id == ENT_AUTO_BERTI){
 					game.level_array[x][y].move_randomly(x,y);
-				}else if(game.level_array[x][y].id == 7 || game.level_array[x][y].id == 10){// Purple and green monster
+				}else if(game.level_array[x][y].id == ENT_PURPLE_MONSTER || game.level_array[x][y].id == ENT_GREEN_MONSTER){
 					game.level_array[x][y].chase_berti(x,y);
 				}
 				
@@ -2978,14 +3005,15 @@ function render_block(x, y, render_option){
 		needs_update = true;
 	}
 	
-	if(game.level_array[x][y].id <= 0) return;// Optimization (empty and dummy block can't be drawn)
+	if(game.level_array[x][y].id == ENT_EMPTY || game.level_array[x][y].id == ENT_DUMMY){
+		// Optimization (empty and dummy block can't be drawn)
+		return;
+	}
 	
 	if(needs_update)
 	switch (game.level_array[x][y].id) {
-		/*case -1://DUMMY BLOCK (invisible). Prevents entities from moving to already occupied spaces.
-			break;*/
-		case 1:// 1: Berti
-		case 2:// 2: AUTO Menu Berti
+		case ENT_PLAYER_BERTI:
+		case ENT_AUTO_BERTI:
 			if(block.animation_frame >= 63 && block.animation_frame < 66){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 66){
@@ -3020,7 +3048,7 @@ function render_block(x, y, render_option){
 				block.animation_frame = 91;
 			}
 			break;
-		case 7:// Purple monster (Monster 2)
+		case ENT_PURPLE_MONSTER:
 			if(block.animation_frame >= 111 && block.animation_frame < 114){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 114){
@@ -3059,7 +3087,7 @@ function render_block(x, y, render_option){
 				block.animation_frame = 143;
 			}
 			break;
-		case 10:// Green monster (Monster 2)
+		case ENT_GREEN_MONSTER:
 			if(block.animation_frame >= 147 && block.animation_frame < 150){
 				block.animation_frame += 1;
 			}else if(block.animation_frame == 150){
