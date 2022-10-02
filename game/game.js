@@ -2750,8 +2750,16 @@ let update_entities = function(){
 let render = function () {
 	let now = Date.now();
     let elapsed = now - game.then;
-	if (elapsed > game.fpsInterval) {
-        game.then = now - (elapsed % game.fpsInterval);
+	
+	// Fudge factor: Tolerate timing inaccuracies without skipping update step
+	// Reason: Deliberate reduction in timing accuracy due to browser security
+	const fudge_factor = 2;
+	if (elapsed + fudge_factor > game.fpsInterval) {
+		if (elapsed > game.fpsInterval) {
+			game.then = now - (elapsed % game.fpsInterval);
+		}else{
+			game.then = now;
+		}
 		update();
 	}
 	
