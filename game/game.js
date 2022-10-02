@@ -1220,7 +1220,6 @@ function CLASS_game(){
 	
 	this.fpsInterval = 1000 / UPS;
 	this.then = Date.now();
-	this.now;
 	
 	this.initialized = false;
 	this.wait_timer = INTRO_DURATION*UPS;
@@ -2749,10 +2748,10 @@ let update_entities = function(){
 
 // Render scene
 let render = function () {
-	game.now = Date.now();
-    let elapsed = game.now - game.then;
+	let now = Date.now();
+    let elapsed = now - game.then;
 	if (elapsed > game.fpsInterval) {
-        game.then = game.now - (elapsed % game.fpsInterval);
+        game.then = now - (elapsed % game.fpsInterval);
 		update();
 	}
 	
