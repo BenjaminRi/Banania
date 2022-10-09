@@ -314,6 +314,19 @@ const IMG_BTN_OK_DOWN             = 182;
 const IMG_BTN_YES_UP              = 183;
 const IMG_BTN_YES_DOWN            = 184;
 
+const IMG_DIGIT_LOOKUP = [
+	IMG_DIGIT_0,
+	IMG_DIGIT_1,
+	IMG_DIGIT_2,
+	IMG_DIGIT_3,
+	IMG_DIGIT_4,
+	IMG_DIGIT_5,
+	IMG_DIGIT_6,
+	IMG_DIGIT_7,
+	IMG_DIGIT_8,
+	IMG_DIGIT_9
+];
+
 function CLASS_resources(){
 // Private:
 	let that = this;
@@ -3354,26 +3367,26 @@ function render_buttons(){
 	
 	if(game.buttons_activated[0]){
 		if(vis.buttons_pressed[0]){
-			CTX.drawImage(res.images[26], 219, 35);// << pressed
+			CTX.drawImage(res.images[IMG_BTN_PREV_DOWN], 219, 35);// << pressed
 		}else{
-			CTX.drawImage(res.images[23], 219, 35);// << up
+			CTX.drawImage(res.images[IMG_BTN_PREV_UP], 219, 35);// << up
 		}
 	}else{
-		CTX.drawImage(res.images[29], 219, 35);// << disabled
+		CTX.drawImage(res.images[IMG_BTN_PREV_DISABLED], 219, 35);// << disabled
 	}
 	
 	if(vis.buttons_pressed[1]){
-		CTX.drawImage(res.images[25], 253, 35);// Berti pressed
+		CTX.drawImage(res.images[IMG_BTN_BERTI_DOWN], 253, 35);// Berti pressed
 	}else{
 		if(vis.berti_blink_time < 100){
-			CTX.drawImage(res.images[22], 253, 35);// Berti up
+			CTX.drawImage(res.images[IMG_BTN_BERTI_UP], 253, 35);// Berti up
 			if(vis.berti_blink_time == 0){
 				vis.berti_blink_time = 103;//Math.floor(100+(Math.random()*100)+1);
 			}else{
 				vis.berti_blink_time--;
 			}
 		}else{
-			CTX.drawImage(res.images[28], 253, 35);// Berti up blink
+			CTX.drawImage(res.images[IMG_BTN_BERTI_BLINK_UP], 253, 35);// Berti up blink
 			if(vis.berti_blink_time == 100){
 				vis.berti_blink_time = Math.floor((Math.random()*95)+5);
 			}else{
@@ -3384,12 +3397,12 @@ function render_buttons(){
 	
 	if(game.buttons_activated[2]){
 		if(vis.buttons_pressed[2]){
-			CTX.drawImage(res.images[27], 287, 35);// >> pressed
+			CTX.drawImage(res.images[IMG_BTN_NEXT_DOWN], 287, 35);// >> pressed
 		}else{
-			CTX.drawImage(res.images[24], 287, 35);// >> up
+			CTX.drawImage(res.images[IMG_BTN_NEXT_UP], 287, 35);// >> up
 		}
 	}else{
-		CTX.drawImage(res.images[30], 287, 35);// >> disabled
+		CTX.drawImage(res.images[IMG_BTN_NEXT_DISABLED], 287, 35);// >> disabled
 	}
 
 }
@@ -3399,20 +3412,22 @@ function render_displays(){
 	let steps_length = Math.min(steps_string.length-1, 4);
 
 	for(let i = steps_length; i >= 0; i--){
-		CTX.drawImage(res.images[11+parseInt(steps_string.charAt(i))], 101-(steps_length-i)*13, 41);
+		var img = IMG_DIGIT_LOOKUP[parseInt(steps_string.charAt(i))];
+		CTX.drawImage(res.images[img], 101-(steps_length-i)*13, 41);
 	}
 	for(let i = steps_length+1; i < 5; i++){
-		CTX.drawImage(res.images[21], 101-i*13, 41);
+		CTX.drawImage(res.images[IMG_DIGIT_EMPTY], 101-i*13, 41);
 	}
 
 	let level_string = game.level_number.toString();
 	let level_length = Math.min(level_string.length-1, 4);
 
 	for(let i = level_length; i >= 0; i--){
-		CTX.drawImage(res.images[11+parseInt(level_string.charAt(i))], 506-(level_length-i)*13, 41);
+		var img = IMG_DIGIT_LOOKUP[parseInt(level_string.charAt(i))];
+		CTX.drawImage(res.images[img], 506-(level_length-i)*13, 41);
 	}
 	for(let i = level_length+1; i < 5; i++){
-		CTX.drawImage(res.images[21], 506-i*13, 41);
+		CTX.drawImage(res.images[IMG_DIGIT_EMPTY], 506-i*13, 41);
 	}
 }
 
