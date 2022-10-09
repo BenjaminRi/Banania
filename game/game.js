@@ -2604,7 +2604,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "154px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-154)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[173].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_CONFIRM].src+')';
 				
 				let f_y;
 				let f_n;
@@ -2636,7 +2636,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "213px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[174].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_SAVELOAD].src+')';
 				
 				add_text("Player name:", 20, 35);
 				add_input(100, 35, 120, 15, "text");
@@ -2674,7 +2674,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "213px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[174].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_SAVELOAD].src+')';
 				
 				add_text("Player name:", 20, 35);
 				add_input(100, 35, 120, 15, "text");
@@ -2701,7 +2701,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "213px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-256)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-213)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[174].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_SAVELOAD].src+')';
 				
 				add_text("Old password:", 20, 35);
 				add_input(100, 35, 120, 15, "password");
@@ -2728,7 +2728,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "273px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-197)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-273)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[175].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_LOADLVL].src+')';
 				
 				add_lvlselect(20, 80, 158, 109);
 				
@@ -2762,7 +2762,7 @@ function CLASS_visual(){
 				that.dbx.style.height = "346px";
 				that.dbx.style.left = Math.max(Math.floor(window.innerWidth-322)/2, 0)+"px";
 				that.dbx.style.top = Math.max(Math.floor(window.innerHeight-346)/2, 0)+"px";
-				that.dbx.style.background = 'url('+res.images[176].src+')';
+				that.dbx.style.background = 'url('+res.images[IMG_DIALOGBOX_CHARTS].src+')';
 				
 				let uc = localStorage.getItem("user_count");
 				let user_arr = new Array();
@@ -2976,7 +2976,7 @@ let render = function () {
 		}else if(game.mode == 1){
 			render_field();
 		}else if(game.mode == 2){// Won!
-			CTX.drawImage(res.images[170], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
+			CTX.drawImage(res.images[IMG_ENDSCREEN], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 		}
 		render_vol_bar();
 		render_menu();
@@ -3049,7 +3049,7 @@ function render_menu(){
 			
 			for(let j = 0; j < sm.options.length; j++){
 				let next_offset;
-				let check_image = 171;
+				let check_image = IMG_CHECKBOX_CHECKED;
 				
 				if(sm.options[j].line){
 					next_offset = option_offset + sm.offset_line;
@@ -3069,7 +3069,7 @@ function render_menu(){
 					CTX.fillRect(vis.menu1.offset_x + submenu_offset + 3 , option_offset, sm.dd_width - 6, sm.offset_text);// Options box
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 					
-					check_image = 172;
+					check_image = IMG_CHECKBOX_UNCHECKED;
 				}else if(!sm.options[j].on()){
 					CTX.fillStyle = "rgb("+vis.white.r+", "+vis.white.g+", "+vis.white.b+")";
 					CTX.fillText(sm.options[j].name, vis.menu1.offset_x + submenu_offset + 21, option_offset + 2);
@@ -3140,18 +3140,18 @@ function render_field(){
 	if(game.level_ended == 1){// Berti cheering, wow or yeah
 		for(let i = 0; i < game.berti_positions.length; i++){
 			if(game.wow){
-				CTX.drawImage(res.images[168],
+				CTX.drawImage(res.images[IMG_WOW],
 				LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_wow_x,
 				LEV_OFFSET_Y+24*game.berti_positions[i].y+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.y+vis.offset_wow_y);
 			}else{
-				CTX.drawImage(res.images[169],
+				CTX.drawImage(res.images[IMG_YEAH],
 				LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_yeah_x,
 				LEV_OFFSET_Y+24*game.berti_positions[i].y+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.y+vis.offset_yeah_y);
 			}
 		}
 	}else if(game.level_ended == 2){// Berti dies in a pool of blood
 		for(let i = 0; i < game.berti_positions.length; i++){
-			CTX.drawImage(res.images[167],
+			CTX.drawImage(res.images[IMG_ARGL],
 			LEV_OFFSET_X+24*game.berti_positions[i].x+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.x+vis.offset_argl_x,
 			LEV_OFFSET_Y+24*game.berti_positions[i].y+game.level_array[game.berti_positions[i].x][game.berti_positions[i].y].moving_offset.y+vis.offset_argl_y);
 		}
