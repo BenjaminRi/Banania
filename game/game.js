@@ -2064,7 +2064,7 @@ function CLASS_visual(){
 						block.animation_frame = 59;
 						break;
 					case ENT_PINNED_BLOCK:
-						block.animation_frame = 31;
+						block.animation_frame = IMG_BLOCK_PINNED;
 						break;
 					case ENT_BANANA_PEEL:
 						block.animation_frame = IMG_BANANA_PEEL;
@@ -2072,10 +2072,10 @@ function CLASS_visual(){
 						block.fine_offset_y = that.offset_banana_y;
 						break;
 					case ENT_LIGHT_BLOCK:
-						block.animation_frame = 32;
+						block.animation_frame = IMG_BLOCK_LIGHT;
 						break;
 					case ENT_HEAVY_BLOCK:
-						block.animation_frame = 33;
+						block.animation_frame = IMG_BLOCK_HEAVY;
 						break;
 					case ENT_PURPLE_MONSTER:
 						block.animation_frame = 111;
