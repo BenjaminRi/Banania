@@ -2061,7 +2061,7 @@ function CLASS_visual(){
 						break;
 					case ENT_PLAYER_BERTI:
 					case ENT_AUTO_BERTI:
-						block.animation_frame = 59;
+						block.animation_frame = IMG_BERTI_IDLE;
 						break;
 					case ENT_PINNED_BLOCK:
 						block.animation_frame = IMG_BLOCK_PINNED;
@@ -2078,10 +2078,10 @@ function CLASS_visual(){
 						block.animation_frame = IMG_BLOCK_HEAVY;
 						break;
 					case ENT_PURPLE_MONSTER:
-						block.animation_frame = 111;
+						block.animation_frame = IMG_PURPMON_STUCK_0;
 						break;
 					case ENT_GREEN_MONSTER:
-						block.animation_frame = 147;
+						block.animation_frame = IMG_GREENMON_STUCK_0;
 						break;
 					case ENT_KEY_1:
 						block.animation_frame = IMG_KEY_1;
@@ -2114,22 +2114,22 @@ function CLASS_visual(){
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_DOOR_1:
-						block.animation_frame = 41;
+						block.animation_frame = IMG_DOOR_1_CLOSED;
 						break;
 					case ENT_DOOR_2:
-						block.animation_frame = 44;
+						block.animation_frame = IMG_DOOR_2_CLOSED;
 						break;
 					case ENT_DOOR_3:
-						block.animation_frame = 47;
+						block.animation_frame = IMG_DOOR_3_CLOSED;
 						break;
 					case ENT_DOOR_4:
-						block.animation_frame = 50;
+						block.animation_frame = IMG_DOOR_4_CLOSED;
 						break;
 					case ENT_DOOR_5:
-						block.animation_frame = 53;
+						block.animation_frame = IMG_DOOR_5_CLOSED;
 						break;
 					case ENT_DOOR_6:
-						block.animation_frame = 56;
+						block.animation_frame = IMG_DOOR_6_CLOSED;
 						break;
 				
 					default:
@@ -2152,23 +2152,23 @@ function CLASS_visual(){
 						if(block.pushing){
 							switch (block.face_dir) {
 								case DIR_UP:
-									if(block.animation_frame < 87 || block.animation_frame > 90){
-										block.animation_frame = 87;
+									if(block.animation_frame < IMG_BERTI_PUSH_UP_0 || block.animation_frame > IMG_BERTI_PUSH_UP_3){
+										block.animation_frame = IMG_BERTI_PUSH_UP_0;
 									}
 									break;
 								case DIR_DOWN:
-									if(block.animation_frame < 91 || block.animation_frame > 94){
-										block.animation_frame = 91;
+									if(block.animation_frame < IMG_BERTI_PUSH_DOWN_0 || block.animation_frame > IMG_BERTI_PUSH_DOWN_3){
+										block.animation_frame = IMG_BERTI_PUSH_DOWN_0;
 									}
 									break;
 								case DIR_LEFT:
-									if(block.animation_frame < 79 || block.animation_frame > 82){
-										block.animation_frame = 79;
+									if(block.animation_frame < IMG_BERTI_PUSH_LEFT_0 || block.animation_frame > IMG_BERTI_PUSH_LEFT_3){
+										block.animation_frame = IMG_BERTI_PUSH_LEFT_0;
 									}
 									break;
 								case DIR_RIGHT:
-									if(block.animation_frame < 83 || block.animation_frame > 86){
-										block.animation_frame = 83;
+									if(block.animation_frame < IMG_BERTI_PUSH_RIGHT_0 || block.animation_frame > IMG_BERTI_PUSH_RIGHT_3){
+										block.animation_frame = IMG_BERTI_PUSH_RIGHT_0;
 									}
 									break;
 								default:
@@ -2178,23 +2178,23 @@ function CLASS_visual(){
 						}else{
 							switch (block.face_dir) {
 								case DIR_UP:
-									if(block.animation_frame < 71 || block.animation_frame > 74){
-										block.animation_frame = 71;
+									if(block.animation_frame < IMG_BERTI_WALK_UP_0 || block.animation_frame > IMG_BERTI_WALK_UP_3){
+										block.animation_frame = IMG_BERTI_WALK_UP_0;
 									}
 									break;
 								case DIR_DOWN:
-									if(block.animation_frame < 75 || block.animation_frame > 78){
-										block.animation_frame = 75;
+									if(block.animation_frame < IMG_BERTI_WALK_DOWN_0 || block.animation_frame > IMG_BERTI_WALK_DOWN_3){
+										block.animation_frame = IMG_BERTI_WALK_DOWN_0;
 									}
 									break;
 								case DIR_LEFT:
-									if(block.animation_frame < 63 || block.animation_frame > 66){
-										block.animation_frame = 63;
+									if(block.animation_frame < IMG_BERTI_WALK_LEFT_0 || block.animation_frame > IMG_BERTI_WALK_LEFT_3){
+										block.animation_frame = IMG_BERTI_WALK_LEFT_0;
 									}
 									break;
 								case DIR_RIGHT:
-									if(block.animation_frame < 67 || block.animation_frame > 70){
-										block.animation_frame = 67;
+									if(block.animation_frame < IMG_BERTI_WALK_RIGHT_0 || block.animation_frame > IMG_BERTI_WALK_RIGHT_3){
+										block.animation_frame = IMG_BERTI_WALK_RIGHT_0;
 									}
 									break;
 								default:
@@ -2203,12 +2203,12 @@ function CLASS_visual(){
 							}
 						}
 					}else{
-						block.animation_frame = 59;
+						block.animation_frame = IMG_BERTI_IDLE;
 					}
 				}else if(game.level_ended == 1){
-					block.animation_frame = 61;
+					block.animation_frame = IMG_BERTI_CELEBRATING;
 				}else if(game.level_ended == 2){
-					block.animation_frame = 62;
+					block.animation_frame = IMG_BERTI_DEAD;
 				}
 				break;
 			case ENT_PURPLE_MONSTER:
@@ -2219,23 +2219,23 @@ function CLASS_visual(){
 						if(block.pushing){
 							switch (block.face_dir) {
 								case DIR_UP:
-									if(block.animation_frame < 139 || block.animation_frame > 142){
-										block.animation_frame = 139;
+									if(block.animation_frame < IMG_PURPMON_PUSH_UP_0 || block.animation_frame > IMG_PURPMON_PUSH_UP_3){
+										block.animation_frame = IMG_PURPMON_PUSH_UP_0;
 									}
 									break;
 								case DIR_DOWN:
-									if(block.animation_frame < 143 || block.animation_frame > 146){
-										block.animation_frame = 143;
+									if(block.animation_frame < IMG_PURPMON_PUSH_DOWN_0 || block.animation_frame > IMG_PURPMON_PUSH_DOWN_3){
+										block.animation_frame = IMG_PURPMON_PUSH_DOWN_0;
 									}
 									break;
 								case DIR_LEFT:
-									if(block.animation_frame < 131 || block.animation_frame > 134){
-										block.animation_frame = 131;
+									if(block.animation_frame < IMG_PURPMON_PUSH_LEFT_0 || block.animation_frame > IMG_PURPMON_PUSH_LEFT_3){
+										block.animation_frame = IMG_PURPMON_PUSH_LEFT_0;
 									}
 									break;
 								case DIR_RIGHT:
-									if(block.animation_frame < 135 || block.animation_frame > 138){
-										block.animation_frame = 135;
+									if(block.animation_frame < IMG_PURPMON_PUSH_RIGHT_0 || block.animation_frame > IMG_PURPMON_PUSH_RIGHT_3){
+										block.animation_frame = IMG_PURPMON_PUSH_RIGHT_0;
 									}
 									break;
 								default:
@@ -2245,23 +2245,23 @@ function CLASS_visual(){
 						}else{
 							switch (block.face_dir) {
 								case DIR_UP:
-									if(block.animation_frame < 123 || block.animation_frame > 126){
-										block.animation_frame = 123;
+									if(block.animation_frame < IMG_PURPMON_WALK_UP_0 || block.animation_frame > IMG_PURPMON_WALK_UP_3){
+										block.animation_frame = IMG_PURPMON_WALK_UP_0;
 									}
 									break;
 								case DIR_DOWN:
-									if(block.animation_frame < 127 || block.animation_frame > 130){
-										block.animation_frame = 127;
+									if(block.animation_frame < IMG_PURPMON_WALK_DOWN_0 || block.animation_frame > IMG_PURPMON_WALK_DOWN_3){
+										block.animation_frame = IMG_PURPMON_WALK_DOWN_0;
 									}
 									break;
 								case DIR_LEFT:
-									if(block.animation_frame < 115 || block.animation_frame > 118){
-										block.animation_frame = 115;
+									if(block.animation_frame < IMG_PURPMON_WALK_LEFT_0 || block.animation_frame > IMG_PURPMON_WALK_LEFT_3){
+										block.animation_frame = IMG_PURPMON_WALK_LEFT_0;
 									}
 									break;
 								case DIR_RIGHT:
-									if(block.animation_frame < 119 || block.animation_frame > 122){
-										block.animation_frame = 119;
+									if(block.animation_frame < IMG_PURPMON_WALK_RIGHT_0 || block.animation_frame > IMG_PURPMON_WALK_RIGHT_3){
+										block.animation_frame = IMG_PURPMON_WALK_RIGHT_0;
 									}
 									break;
 								default:
@@ -2270,10 +2270,10 @@ function CLASS_visual(){
 							}
 						}
 					}else{
-						block.animation_frame = 111;
+						block.animation_frame = IMG_PURPMON_STUCK_0;
 					}
 				}else{
-					block.animation_frame = 111;
+					block.animation_frame = IMG_PURPMON_STUCK_0;
 				}
 				break;
 			case ENT_GREEN_MONSTER:
@@ -2283,23 +2283,23 @@ function CLASS_visual(){
 						block.fine_offset_x = -1;
 						switch (block.face_dir) {
 							case DIR_UP:
-								if(block.animation_frame < 159 || block.animation_frame > 162){
-									block.animation_frame = 159;
+								if(block.animation_frame < IMG_GREENMON_WALK_UP_0 || block.animation_frame > IMG_GREENMON_WALK_UP_3){
+									block.animation_frame = IMG_GREENMON_WALK_UP_0;
 								}
 								break;
 							case DIR_DOWN:
-								if(block.animation_frame < 163 || block.animation_frame > 166){
-									block.animation_frame = 163;
+								if(block.animation_frame < IMG_GREENMON_WALK_DOWN_0 || block.animation_frame > IMG_GREENMON_WALK_DOWN_3){
+									block.animation_frame = IMG_GREENMON_WALK_DOWN_0;
 								}
 								break;
 							case DIR_LEFT:
-								if(block.animation_frame < 151 || block.animation_frame > 154){
-									block.animation_frame = 151;
+								if(block.animation_frame < IMG_GREENMON_WALK_LEFT_0 || block.animation_frame > IMG_GREENMON_WALK_LEFT_3){
+									block.animation_frame = IMG_GREENMON_WALK_LEFT_0;
 								}
 								break;
 							case DIR_RIGHT:
-								if(block.animation_frame < 155 || block.animation_frame > 158){
-									block.animation_frame = 155;
+								if(block.animation_frame < IMG_GREENMON_WALK_RIGHT_0 || block.animation_frame > IMG_GREENMON_WALK_RIGHT_3){
+									block.animation_frame = IMG_GREENMON_WALK_RIGHT_0;
 								}
 								break;
 							default:
@@ -2307,40 +2307,40 @@ function CLASS_visual(){
 								break;
 						}
 					}else{
-						block.animation_frame = 147;
+						block.animation_frame = IMG_GREENMON_STUCK_0;
 					}
 				}else{
-					block.animation_frame = 147;
+					block.animation_frame = IMG_GREENMON_STUCK_0;
 				}
 				break;
 			case ENT_DOOR_1:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 43-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_1_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			case ENT_DOOR_2:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 46-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_2_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			case ENT_DOOR_3:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 49-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_3_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			case ENT_DOOR_4:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 52-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_4_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			case ENT_DOOR_5:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 55-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_5_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			case ENT_DOOR_6:
 				if(block.gets_removed_in >= 0){
-					block.animation_frame = 58-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
+					block.animation_frame = IMG_DOOR_6_FADING-Math.floor(block.gets_removed_in/game.door_removal_delay*2);
 				}
 				break;
 			default:
@@ -3221,100 +3221,100 @@ function render_block(x, y, render_option){
 	switch (game.level_array[x][y].id) {
 		case ENT_PLAYER_BERTI:
 		case ENT_AUTO_BERTI:
-			if(block.animation_frame >= 63 && block.animation_frame < 66){
+			if(block.animation_frame >= IMG_BERTI_WALK_LEFT_0 && block.animation_frame < IMG_BERTI_WALK_LEFT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 66){
-				block.animation_frame = 63;
-			}else if(block.animation_frame >= 67 && block.animation_frame < 70){
+			}else if(block.animation_frame == IMG_BERTI_WALK_LEFT_3){
+				block.animation_frame = IMG_BERTI_WALK_LEFT_0;
+			}else if(block.animation_frame >= IMG_BERTI_WALK_RIGHT_0 && block.animation_frame < IMG_BERTI_WALK_RIGHT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 70){
-				block.animation_frame = 67;
-			}else if(block.animation_frame >= 71 && block.animation_frame < 74){
+			}else if(block.animation_frame == IMG_BERTI_WALK_RIGHT_3){
+				block.animation_frame = IMG_BERTI_WALK_RIGHT_0;
+			}else if(block.animation_frame >= IMG_BERTI_WALK_UP_0 && block.animation_frame < IMG_BERTI_WALK_UP_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 74){
-				block.animation_frame = 71;
-			}else if(block.animation_frame >= 75 && block.animation_frame < 78){
+			}else if(block.animation_frame == IMG_BERTI_WALK_UP_3){
+				block.animation_frame = IMG_BERTI_WALK_UP_0;
+			}else if(block.animation_frame >= IMG_BERTI_WALK_DOWN_0 && block.animation_frame < IMG_BERTI_WALK_DOWN_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 78){
-				block.animation_frame = 75;
-			}else if(block.animation_frame >= 79 && block.animation_frame < 82){
+			}else if(block.animation_frame == IMG_BERTI_WALK_DOWN_3){
+				block.animation_frame = IMG_BERTI_WALK_DOWN_0;
+			}else if(block.animation_frame >= IMG_BERTI_PUSH_LEFT_0 && block.animation_frame < IMG_BERTI_PUSH_LEFT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 82){
-				block.animation_frame = 79;
-			}else if(block.animation_frame >= 83 && block.animation_frame < 86){
+			}else if(block.animation_frame == IMG_BERTI_PUSH_LEFT_3){
+				block.animation_frame = IMG_BERTI_PUSH_LEFT_0;
+			}else if(block.animation_frame >= IMG_BERTI_PUSH_RIGHT_0 && block.animation_frame < IMG_BERTI_PUSH_RIGHT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 86){
-				block.animation_frame = 83;
-			}else if(block.animation_frame >= 87 && block.animation_frame < 90){
+			}else if(block.animation_frame == IMG_BERTI_PUSH_RIGHT_3){
+				block.animation_frame = IMG_BERTI_PUSH_RIGHT_0;
+			}else if(block.animation_frame >= IMG_BERTI_PUSH_UP_0 && block.animation_frame < IMG_BERTI_PUSH_UP_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 90){
-				block.animation_frame = 87;
-			}else if(block.animation_frame >= 91 && block.animation_frame < 94){
+			}else if(block.animation_frame == IMG_BERTI_PUSH_UP_3){
+				block.animation_frame = IMG_BERTI_PUSH_UP_0;
+			}else if(block.animation_frame >= IMG_BERTI_PUSH_DOWN_0 && block.animation_frame < IMG_BERTI_PUSH_DOWN_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 94){
-				block.animation_frame = 91;
+			}else if(block.animation_frame == IMG_BERTI_PUSH_DOWN_3){
+				block.animation_frame = IMG_BERTI_PUSH_DOWN_0;
 			}
 			break;
 		case ENT_PURPLE_MONSTER:
-			if(block.animation_frame >= 111 && block.animation_frame < 114){
+			if(block.animation_frame >= IMG_PURPMON_STUCK_0 && block.animation_frame < IMG_PURPMON_STUCK_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 114){
-				block.animation_frame = 111;
-			}else if(block.animation_frame >= 115 && block.animation_frame < 118){
+			}else if(block.animation_frame == IMG_PURPMON_STUCK_3){
+				block.animation_frame = IMG_PURPMON_STUCK_0;
+			}else if(block.animation_frame >= IMG_PURPMON_WALK_LEFT_0 && block.animation_frame < IMG_PURPMON_WALK_LEFT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 118){
-				block.animation_frame = 115;
-			}else if(block.animation_frame >= 119 && block.animation_frame < 122){
+			}else if(block.animation_frame == IMG_PURPMON_WALK_LEFT_3){
+				block.animation_frame = IMG_PURPMON_WALK_LEFT_0;
+			}else if(block.animation_frame >= IMG_PURPMON_WALK_RIGHT_0 && block.animation_frame < IMG_PURPMON_WALK_RIGHT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 122){
-				block.animation_frame = 119;
-			}else if(block.animation_frame >= 123 && block.animation_frame < 126){
+			}else if(block.animation_frame == IMG_PURPMON_WALK_RIGHT_3){
+				block.animation_frame = IMG_PURPMON_WALK_RIGHT_0;
+			}else if(block.animation_frame >= IMG_PURPMON_WALK_UP_0 && block.animation_frame < IMG_PURPMON_WALK_UP_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 126){
-				block.animation_frame = 123;
-			}else if(block.animation_frame >= 127 && block.animation_frame < 130){
+			}else if(block.animation_frame == IMG_PURPMON_WALK_UP_3){
+				block.animation_frame = IMG_PURPMON_WALK_UP_0;
+			}else if(block.animation_frame >= IMG_PURPMON_WALK_DOWN_0 && block.animation_frame < IMG_PURPMON_WALK_DOWN_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 130){
-				block.animation_frame = 127;
-			}else if(block.animation_frame >= 131 && block.animation_frame < 134){
+			}else if(block.animation_frame == IMG_PURPMON_WALK_DOWN_3){
+				block.animation_frame = IMG_PURPMON_WALK_DOWN_0;
+			}else if(block.animation_frame >= IMG_PURPMON_PUSH_LEFT_0 && block.animation_frame < IMG_PURPMON_PUSH_LEFT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 134){
-				block.animation_frame = 131;
-			}else if(block.animation_frame >= 135 && block.animation_frame < 138){
+			}else if(block.animation_frame == IMG_PURPMON_PUSH_LEFT_3){
+				block.animation_frame = IMG_PURPMON_PUSH_LEFT_0;
+			}else if(block.animation_frame >= IMG_PURPMON_PUSH_RIGHT_0 && block.animation_frame < IMG_PURPMON_PUSH_RIGHT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 138){
-				block.animation_frame = 135;
-			}else if(block.animation_frame >= 139 && block.animation_frame < 142){
+			}else if(block.animation_frame == IMG_PURPMON_PUSH_RIGHT_3){
+				block.animation_frame = IMG_PURPMON_PUSH_RIGHT_0;
+			}else if(block.animation_frame >= IMG_PURPMON_PUSH_UP_0 && block.animation_frame < IMG_PURPMON_PUSH_UP_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 142){
-				block.animation_frame = 139;
-			}else if(block.animation_frame >= 143 && block.animation_frame < 146){
+			}else if(block.animation_frame == IMG_PURPMON_PUSH_UP_3){
+				block.animation_frame = IMG_PURPMON_PUSH_UP_0;
+			}else if(block.animation_frame >= IMG_PURPMON_PUSH_DOWN_0 && block.animation_frame < IMG_PURPMON_PUSH_DOWN_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 146){
-				block.animation_frame = 143;
+			}else if(block.animation_frame == IMG_PURPMON_PUSH_DOWN_3){
+				block.animation_frame = IMG_PURPMON_PUSH_DOWN_0;
 			}
 			break;
 		case ENT_GREEN_MONSTER:
-			if(block.animation_frame >= 147 && block.animation_frame < 150){
+			if(block.animation_frame >= IMG_GREENMON_STUCK_0 && block.animation_frame < IMG_GREENMON_STUCK_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 150){
-				block.animation_frame = 147;
-			}else if(block.animation_frame >= 151 && block.animation_frame < 154){
+			}else if(block.animation_frame == IMG_GREENMON_STUCK_3){
+				block.animation_frame = IMG_GREENMON_STUCK_0;
+			}else if(block.animation_frame >= IMG_GREENMON_WALK_LEFT_0 && block.animation_frame < IMG_GREENMON_WALK_LEFT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 154){
-				block.animation_frame = 151;
-			}else if(block.animation_frame >= 155 && block.animation_frame < 158){
+			}else if(block.animation_frame == IMG_GREENMON_WALK_LEFT_3){
+				block.animation_frame = IMG_GREENMON_WALK_LEFT_0;
+			}else if(block.animation_frame >= IMG_GREENMON_WALK_RIGHT_0 && block.animation_frame < IMG_GREENMON_WALK_RIGHT_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 158){
-				block.animation_frame = 155;
-			}else if(block.animation_frame >= 159 && block.animation_frame < 162){
+			}else if(block.animation_frame == IMG_GREENMON_WALK_RIGHT_3){
+				block.animation_frame = IMG_GREENMON_WALK_RIGHT_0;
+			}else if(block.animation_frame >= IMG_GREENMON_WALK_UP_0 && block.animation_frame < IMG_GREENMON_WALK_UP_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 162){
-				block.animation_frame = 159;
-			}else if(block.animation_frame >= 163 && block.animation_frame < 166){
+			}else if(block.animation_frame == IMG_GREENMON_WALK_UP_3){
+				block.animation_frame = IMG_GREENMON_WALK_UP_0;
+			}else if(block.animation_frame >= IMG_GREENMON_WALK_DOWN_0 && block.animation_frame < IMG_GREENMON_WALK_DOWN_3){
 				block.animation_frame += 1;
-			}else if(block.animation_frame == 166){
-				block.animation_frame = 163;
+			}else if(block.animation_frame == IMG_GREENMON_WALK_DOWN_3){
+				block.animation_frame = IMG_GREENMON_WALK_DOWN_0;
 			}
 			break;
 		default:
