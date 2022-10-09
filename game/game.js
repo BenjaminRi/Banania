@@ -128,6 +128,192 @@ vis.init_menus();
 // Images, sounds, level. Just resources.
 //////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
+const IMG_BACKGROUND              = 0;
+const IMG_TITLESCREEN             = 1;
+const IMG_BANANA_PEEL             = 2;
+const IMG_KEY_1                   = 3;
+const IMG_KEY_2                   = 4;
+const IMG_KEY_3                   = 5;
+const IMG_KEY_4                   = 6;
+const IMG_KEY_5                   = 7;
+const IMG_KEY_6                   = 8;
+const IMG_FOOTSTEPS               = 9;
+const IMG_LADDER                  = 10;
+const IMG_DIGIT_0                 = 11;
+const IMG_DIGIT_1                 = 12;
+const IMG_DIGIT_2                 = 13;
+const IMG_DIGIT_3                 = 14;
+const IMG_DIGIT_4                 = 15;
+const IMG_DIGIT_5                 = 16;
+const IMG_DIGIT_6                 = 17;
+const IMG_DIGIT_7                 = 18;
+const IMG_DIGIT_8                 = 19;
+const IMG_DIGIT_9                 = 20;
+const IMG_DIGIT_EMPTY             = 21;
+const IMG_BTN_BERTI_UP            = 22;
+const IMG_BTN_PREV_UP             = 23;
+const IMG_BTN_NEXT_UP             = 24;
+const IMG_BTN_BERTI_DOWN          = 25;
+const IMG_BTN_PREV_DOWN           = 26;
+const IMG_BTN_NEXT_DOWN           = 27;
+const IMG_BTN_BERTI_BLINK_UP      = 28;
+const IMG_BTN_PREV_DISABLED       = 29;
+const IMG_BTN_NEXT_DISABLED       = 30;
+const IMG_BLOCK_PINNED            = 31;
+const IMG_BLOCK_LIGHT             = 32;
+const IMG_BLOCK_HEAVY             = 33;
+const IMG_BLOCK_DOOR_1            = 34;
+const IMG_BLOCK_DOOR_2            = 35;
+const IMG_BLOCK_DOOR_3            = 36;
+const IMG_BLOCK_DOOR_4            = 37;
+const IMG_BLOCK_DOOR_5            = 38;
+const IMG_BLOCK_DOOR_6            = 39;
+const IMG_NONE                    = 40; // Number 40 contains no image due to a miscalculation
+const IMG_DOOR_1_CLOSED           = 41;
+const IMG_DOOR_1_OPENING          = 42;
+const IMG_DOOR_1_FADING           = 43;
+const IMG_DOOR_2_CLOSED           = 44;
+const IMG_DOOR_2_OPENING          = 45;
+const IMG_DOOR_2_FADING           = 46;
+const IMG_DOOR_3_CLOSED           = 47;
+const IMG_DOOR_3_OPENING          = 48;
+const IMG_DOOR_3_FADING           = 49;
+const IMG_DOOR_4_CLOSED           = 50;
+const IMG_DOOR_4_OPENING          = 51;
+const IMG_DOOR_4_FADING           = 52;
+const IMG_DOOR_5_CLOSED           = 53;
+const IMG_DOOR_5_OPENING          = 54;
+const IMG_DOOR_5_FADING           = 55;
+const IMG_DOOR_6_CLOSED           = 56;
+const IMG_DOOR_6_OPENING          = 57;
+const IMG_DOOR_6_FADING           = 58;
+const IMG_BERTI_STANDING          = 59;
+const IMG_BERTI_BLINKING          = 60;
+const IMG_BERTI_CELEBRATING       = 61;
+const IMG_BERTI_DEAD              = 62;
+const IMG_BERTI_WALK_LEFT_0       = 63;
+const IMG_BERTI_WALK_LEFT_1       = 64;
+const IMG_BERTI_WALK_LEFT_2       = 65;
+const IMG_BERTI_WALK_LEFT_3       = 66;
+const IMG_BERTI_WALK_RIGHT_0      = 67;
+const IMG_BERTI_WALK_RIGHT_1      = 68;
+const IMG_BERTI_WALK_RIGHT_2      = 69;
+const IMG_BERTI_WALK_RIGHT_3      = 70;
+const IMG_BERTI_WALK_UP_0         = 71;
+const IMG_BERTI_WALK_UP_1         = 72;
+const IMG_BERTI_WALK_UP_2         = 73;
+const IMG_BERTI_WALK_UP_3         = 74;
+const IMG_BERTI_WALK_DOWN_0       = 75;
+const IMG_BERTI_WALK_DOWN_1       = 76;
+const IMG_BERTI_WALK_DOWN_2       = 77;
+const IMG_BERTI_WALK_DOWN_3       = 78;
+const IMG_BERTI_PUSH_LEFT_0       = 79;
+const IMG_BERTI_PUSH_LEFT_1       = 80;
+const IMG_BERTI_PUSH_LEFT_2       = 81;
+const IMG_BERTI_PUSH_LEFT_3       = 82;
+const IMG_BERTI_PUSH_RIGHT_0      = 83;
+const IMG_BERTI_PUSH_RIGHT_1      = 84;
+const IMG_BERTI_PUSH_RIGHT_2      = 85;
+const IMG_BERTI_PUSH_RIGHT_3      = 86;
+const IMG_BERTI_PUSH_UP_0         = 87;
+const IMG_BERTI_PUSH_UP_1         = 88;
+const IMG_BERTI_PUSH_UP_2         = 89;
+const IMG_BERTI_PUSH_UP_3         = 90;
+const IMG_BERTI_PUSH_DOWN_0       = 91;
+const IMG_BERTI_PUSH_DOWN_1       = 92;
+const IMG_BERTI_PUSH_DOWN_2       = 93;
+const IMG_BERTI_PUSH_DOWN_3       = 94;
+const IMG_BERTI_WALK_LEFT_A_0     = 95;
+const IMG_BERTI_WALK_LEFT_A_1     = 96;
+const IMG_BERTI_WALK_LEFT_A_2     = 97;
+const IMG_BERTI_WALK_LEFT_A_3     = 98;
+const IMG_BERTI_WALK_RIGHT_A_0    = 99;
+const IMG_BERTI_WALK_RIGHT_A_1    = 100;
+const IMG_BERTI_WALK_RIGHT_A_2    = 101;
+const IMG_BERTI_WALK_RIGHT_A_3    = 102;
+const IMG_BERTI_WALK_UP_A_0       = 103;
+const IMG_BERTI_WALK_UP_A_1       = 104;
+const IMG_BERTI_WALK_UP_A_2       = 105;
+const IMG_BERTI_WALK_UP_A_3       = 106;
+const IMG_BERTI_WALK_DOWN_AX_0    = 107;
+const IMG_BERTI_WALK_DOWN_AX_1    = 108;
+const IMG_BERTI_WALK_DOWN_AX_2    = 109;
+const IMG_BERTI_WALK_DOWN_AX_3    = 110;
+const IMG_PURPMON_STUCK_0         = 111;
+const IMG_PURPMON_STUCK_1         = 112;
+const IMG_PURPMON_STUCK_2         = 113;
+const IMG_PURPMON_STUCK_3         = 114;
+const IMG_PURPMON_WALK_LEFT_0     = 115;
+const IMG_PURPMON_WALK_LEFT_1     = 116;
+const IMG_PURPMON_WALK_LEFT_2     = 117;
+const IMG_PURPMON_WALK_LEFT_3     = 118;
+const IMG_PURPMON_WALK_RIGHT_0    = 119;
+const IMG_PURPMON_WALK_RIGHT_1    = 120;
+const IMG_PURPMON_WALK_RIGHT_2    = 121;
+const IMG_PURPMON_WALK_RIGHT_3    = 122;
+const IMG_PURPMON_WALK_UP_0       = 123;
+const IMG_PURPMON_WALK_UP_1       = 124;
+const IMG_PURPMON_WALK_UP_2       = 125;
+const IMG_PURPMON_WALK_UP_3       = 126;
+const IMG_PURPMON_WALK_DOWN_0     = 127;
+const IMG_PURPMON_WALK_DOWN_1     = 128;
+const IMG_PURPMON_WALK_DOWN_2     = 129;
+const IMG_PURPMON_WALK_DOWN_3     = 130;
+const IMG_PURPMON_PUSH_LEFT_0     = 131;
+const IMG_PURPMON_PUSH_LEFT_1     = 132;
+const IMG_PURPMON_PUSH_LEFT_2     = 133;
+const IMG_PURPMON_PUSH_LEFT_3     = 134;
+const IMG_PURPMON_PUSH_RIGHT_0    = 135;
+const IMG_PURPMON_PUSH_RIGHT_1    = 136;
+const IMG_PURPMON_PUSH_RIGHT_2    = 137;
+const IMG_PURPMON_PUSH_RIGHT_3    = 138;
+const IMG_PURPMON_PUSH_UP_0       = 139;
+const IMG_PURPMON_PUSH_UP_1       = 140;
+const IMG_PURPMON_PUSH_UP_2       = 141;
+const IMG_PURPMON_PUSH_UP_3       = 142;
+const IMG_PURPMON_PUSH_DOWN_0     = 143;
+const IMG_PURPMON_PUSH_DOWN_1     = 144;
+const IMG_PURPMON_PUSH_DOWN_2     = 145;
+const IMG_PURPMON_PUSH_DOWN_3     = 146;
+const IMG_GREENMON_STUCK_0        = 147;
+const IMG_GREENMON_STUCK_1        = 148;
+const IMG_GREENMON_STUCK_2        = 149;
+const IMG_GREENMON_STUCK_3        = 150;
+const IMG_GREENMON_WALK_LEFT_0    = 151;
+const IMG_GREENMON_WALK_LEFT_1    = 152;
+const IMG_GREENMON_WALK_LEFT_2    = 153;
+const IMG_GREENMON_WALK_LEFT_3    = 154;
+const IMG_GREENMON_WALK_RIGHT_0   = 155;
+const IMG_GREENMON_WALK_RIGHT_1   = 156;
+const IMG_GREENMON_WALK_RIGHT_2   = 157;
+const IMG_GREENMON_WALK_RIGHT_3   = 158;
+const IMG_GREENMON_WALK_UP_0      = 159;
+const IMG_GREENMON_WALK_UP_1      = 160;
+const IMG_GREENMON_WALK_UP_2      = 161;
+const IMG_GREENMON_WALK_UP_3      = 162;
+const IMG_GREENMON_WALK_DOWN_0    = 163;
+const IMG_GREENMON_WALK_DOWN_1    = 164;
+const IMG_GREENMON_WALK_DOWN_2    = 165;
+const IMG_GREENMON_WALK_DOWN_3    = 166;
+const IMG_ARGL                    = 167;
+const IMG_WOW                     = 168;
+const IMG_YEAH                    = 169;
+const IMG_ENDSCREEN               = 170;
+const IMG_CHECKBOX_CHECKED        = 171;
+const IMG_CHECKBOX_UNCHECKED      = 172;
+const IMG_DIALOGBOX_CONFIRM       = 173;
+const IMG_DIALOGBOX_SAVELOAD      = 174;
+const IMG_DIALOGBOX_LOADLVL       = 175;
+const IMG_DIALOGBOX_CHARTS        = 176;
+const IMG_BTN_CANCEL_UP           = 177;
+const IMG_BTN_CANCEL_DOWN         = 178;
+const IMG_BTN_NO_UP               = 179;
+const IMG_BTN_NO_DOWN             = 180;
+const IMG_BTN_OK_UP               = 181;
+const IMG_BTN_OK_DOWN             = 182;
+const IMG_BTN_YES_UP              = 183;
+const IMG_BTN_YES_DOWN            = 184;
+
 function CLASS_resources(){
 // Private:
 	let that = this;
@@ -183,13 +369,13 @@ function CLASS_resources(){
 			}
 		}
 
-		for(let i = 0; i < 9; i++){// From 31 to 38 stones
+		for(let i = 0; i < 9; i++){// From 31 to 39 stones
 			that.images[31+i] = new Image();
 			that.images[31+i].onload = on_loaded();
 			that.images[31+i].src = IMAGE_DIR+"stone_"+i+".png";
 		}
 		
-		// Numbers 39 and 40 contain no images due to a miscalculation
+		// Number 40 contains no image due to a miscalculation
 
 		for(let i = 0; i < 6; i++){// From 41 to 58 doors
 			for(let j = 0; j < 3; j++){// Reversed order for ease of access
@@ -207,7 +393,7 @@ function CLASS_resources(){
 			}
 		}
 
-		for(let i = 0; i < 9; i++){// From 111 to 146 monster 1(purple)
+		for(let i = 0; i < 9; i++){// From 111 to 146 monster 1 (purple)
 			for(let j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[111+4*i+j] = new Image();
 				that.images[111+4*i+j].onload = on_loaded();
@@ -215,7 +401,7 @@ function CLASS_resources(){
 			}
 		}
 
-		for(let i = 0; i < 5; i++){// From 147 to 166 monster 2(green)
+		for(let i = 0; i < 5; i++){// From 147 to 166 monster 2 (green)
 			for(let j = 0; j < 4; j++){// Reversed order for ease of access
 				that.images[147+4*i+j] = new Image();
 				that.images[147+4*i+j].onload = on_loaded();
