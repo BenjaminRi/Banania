@@ -2067,7 +2067,7 @@ function CLASS_visual(){
 						block.animation_frame = 31;
 						break;
 					case ENT_BANANA_PEEL:
-						block.animation_frame = 2;
+						block.animation_frame = IMG_BANANA_PEEL;
 						block.fine_offset_x = that.offset_banana_x;
 						block.fine_offset_y = that.offset_banana_y;
 						break;
@@ -2084,32 +2084,32 @@ function CLASS_visual(){
 						block.animation_frame = 147;
 						break;
 					case ENT_KEY_1:
-						block.animation_frame = 3;
+						block.animation_frame = IMG_KEY_1;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_KEY_2:
-						block.animation_frame = 4;
+						block.animation_frame = IMG_KEY_2;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_KEY_3:
-						block.animation_frame = 5;
+						block.animation_frame = IMG_KEY_3;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_KEY_4:
-						block.animation_frame = 6;
+						block.animation_frame = IMG_KEY_4;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_KEY_5:
-						block.animation_frame = 7;
+						block.animation_frame = IMG_KEY_5;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
 					case ENT_KEY_6:
-						block.animation_frame = 8;
+						block.animation_frame = IMG_KEY_6;
 						block.fine_offset_x = that.offset_key_x;
 						block.fine_offset_y = that.offset_key_y;
 						break;
