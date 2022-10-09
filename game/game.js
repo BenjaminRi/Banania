@@ -2973,13 +2973,13 @@ let render = function () {
 	game.update_drawn = true;
 
 	if (res.ready()) {
-		CTX.drawImage(res.images[0], 0, 0);// Background
-		CTX.drawImage(res.images[9], 22, 41);// Steps
-		CTX.drawImage(res.images[10], 427, 41);// Ladder
+		CTX.drawImage(res.images[IMG_BACKGROUND], 0, 0);
+		CTX.drawImage(res.images[IMG_FOOTSTEPS], 22, 41);
+		CTX.drawImage(res.images[IMG_LADDER], 427, 41);
 		render_displays();
 		render_buttons();
 		if(game.mode == 0){// Title image
-			CTX.drawImage(res.images[1], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
+			CTX.drawImage(res.images[IMG_TITLESCREEN], LEV_OFFSET_X+4, LEV_OFFSET_Y+4);
 			
 			CTX.fillStyle = "rgb(0, 0, 0)";
 			CTX.font = "bold 12px Helvetica";
@@ -3147,8 +3147,8 @@ function render_field(){
 	render_field_subset(true);// Consumables in the background
 	render_field_subset(false);// The rest in the foreground
 	
-	CTX.drawImage(res.images[0], 0, 391, 537, 4, 0, LEV_OFFSET_Y+24*LEV_DIMENSION_Y, 537, 4);// Bottom border covering blocks
-	CTX.drawImage(res.images[0], 520, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y, LEV_OFFSET_X+24*LEV_DIMENSION_X, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y);// Right border covering blocks
+	CTX.drawImage(res.images[IMG_BACKGROUND], 0, 391, 537, 4, 0, LEV_OFFSET_Y+24*LEV_DIMENSION_Y, 537, 4);// Bottom border covering blocks
+	CTX.drawImage(res.images[IMG_BACKGROUND], 520, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y, LEV_OFFSET_X+24*LEV_DIMENSION_X, LEV_OFFSET_Y, 4, 391-LEV_OFFSET_Y);// Right border covering blocks
 	
 	if(game.level_ended == 1){// Berti cheering, wow or yeah
 		for(let i = 0; i < game.berti_positions.length; i++){
