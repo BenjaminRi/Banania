@@ -2433,20 +2433,20 @@ function CLASS_visual(){
 	
 	// Dialog box stuff:
 	
-	function add_button(img, pos_x, pos_y, click_effect){
+	function add_button(img_up, img_down, pos_x, pos_y, click_effect){
 		let btn = document.createElement("img");
-		btn.src = res.images[img].src;
+		btn.src = res.images[img_up].src;
 		btn.style.position = "absolute";
-		btn.style.width = res.images[img].width+"px";
-		btn.style.height = res.images[img].height+"px";
+		btn.style.width = res.images[img_up].width+"px";
+		btn.style.height = res.images[img_up].height+"px";
 		btn.style.left = pos_x+"px";
 		btn.style.top = pos_y+"px";
 		
 		btn.pressed = false;
-		btn.onmousedown = function(evt){btn.src = res.images[img+1].src; btn.pressed = true; evt.preventDefault();};
-		btn.onmouseup = function(evt){btn.src = res.images[img].src; btn.pressed = false;};
-		btn.onmouseout = function(evt){btn.src = res.images[img].src;};
-		btn.onmouseover = function(evt){if(btn.pressed && input.mouse_down) btn.src = res.images[img+1].src;};
+		btn.onmousedown = function(evt){btn.src = res.images[img_down].src; btn.pressed = true; evt.preventDefault();};
+		btn.onmouseup = function(evt){btn.src = res.images[img_up].src; btn.pressed = false;};
+		btn.onmouseout = function(evt){btn.src = res.images[img_up].src;};
+		btn.onmouseover = function(evt){if(btn.pressed && input.mouse_down) btn.src = res.images[img_down].src;};
 		btn.onclick = click_effect;
 		
 		that.dbx.appendChild(btn);
@@ -2621,9 +2621,9 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_y;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(183, 20, 100, f_y);// yes
-				add_button(179, 100, 100, f_n);// no
-				add_button(177, 180, 100, f_c);// cancel
+				add_button(IMG_BTN_YES_UP, IMG_BTN_YES_DOWN, 20, 100, f_y);
+				add_button(IMG_BTN_NO_UP, IMG_BTN_NO_DOWN, 100, 100, f_n);
+				add_button(IMG_BTN_CANCEL_UP, IMG_BTN_CANCEL_DOWN, 180, 100, f_c);
 				
 				add_text("Do you want to save the game?", 40, 35);
 				break;
@@ -2660,8 +2660,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);// ok
-				add_button(177, 160, 160, f_c);// cancel
+				add_button(IMG_BTN_OK_UP, IMG_BTN_OK_DOWN, 40, 160, f_o);
+				add_button(IMG_BTN_CANCEL_UP, IMG_BTN_CANCEL_DOWN, 160, 160, f_c);
 				
 				add_errfield(20, 85);
 				break;
@@ -2687,8 +2687,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);// ok
-				add_button(177, 160, 160, f_c);// cancel
+				add_button(IMG_BTN_OK_UP, IMG_BTN_OK_DOWN, 40, 160, f_o);
+				add_button(IMG_BTN_CANCEL_UP, IMG_BTN_CANCEL_DOWN, 160, 160, f_c);
 				
 				add_errfield(20, 85);
 				break;
@@ -2714,8 +2714,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 40, 160, f_o);// ok
-				add_button(177, 160, 160, f_c);// cancel
+				add_button(IMG_BTN_OK_UP, IMG_BTN_OK_DOWN, 40, 160, f_o);
+				add_button(IMG_BTN_CANCEL_UP, IMG_BTN_CANCEL_DOWN, 160, 160, f_c);
 				
 				add_errfield(20, 85);
 				break;
@@ -2738,8 +2738,8 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_c;
 				
-				add_button(181, 25, 220, f_o);// ok
-				add_button(177, 105, 220, f_c);// cancel
+				add_button(IMG_BTN_OK_UP, IMG_BTN_OK_DOWN, 25, 220, f_o);
+				add_button(IMG_BTN_CANCEL_UP, IMG_BTN_CANCEL_DOWN, 105, 220, f_c);
 				
 				add_text("Player name:", 20, 30);
 				if(game.savegame.username === null){
@@ -2796,7 +2796,7 @@ function CLASS_visual(){
 				that.dbx.enterfun = f_o;
 				that.dbx.cancelfun = f_o;
 				
-				add_button(181, 125, 300, f_o);// okay
+				add_button(IMG_BTN_OK_UP, IMG_BTN_OK_DOWN, 125, 300, f_o);
 				break;
 			}
 			default:
