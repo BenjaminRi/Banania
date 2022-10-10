@@ -33,6 +33,11 @@ const DIR_LEFT = 1;
 const DIR_DOWN = 2;
 const DIR_RIGHT = 3;
 
+const KEY_CODE_LEFT  = 37;
+const KEY_CODE_UP    = 38;
+const KEY_CODE_RIGHT = 39;
+const KEY_CODE_DOWN  = 40;
+
 const RENDER_FULL = 0;
 const RENDER_TOP = 1;
 const RENDER_BOTTOM = 2;
@@ -541,13 +546,13 @@ function CLASS_input(){
 	function handle_keydown_global(evt) {
 		game.remove_soundrestriction();
 		that.keys_down[evt.keyCode] = true;
-		if(that.keys_down[37]){
+		if(evt.keyCode == KEY_CODE_LEFT){
 			game.walk_dir = DIR_LEFT;
-		}else if(that.keys_down[38]){
+		}else if(evt.keyCode == KEY_CODE_UP){
 			game.walk_dir = DIR_UP;
-		}else if(that.keys_down[39]){
+		}else if(evt.keyCode == KEY_CODE_RIGHT){
 			game.walk_dir = DIR_RIGHT;
-		}else if(that.keys_down[40]){
+		}else if(evt.keyCode == KEY_CODE_DOWN){
 			game.walk_dir = DIR_DOWN;
 		}
 		
@@ -1356,22 +1361,22 @@ function CLASS_game(){
 	
 	CLASS_entity.prototype.register_input = function(curr_x, curr_y, just_prime){
 		if(!this.moving){
-			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[37] || (!game.single_steps && game.walk_dir == DIR_LEFT) || (game.prime_movement && game.walk_dir == DIR_LEFT)){
+			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[KEY_CODE_LEFT] || (!game.single_steps && game.walk_dir == DIR_LEFT) || (game.prime_movement && game.walk_dir == DIR_LEFT)){
 				game.prime_movement = just_prime;
 				if(!just_prime && game.walkable(curr_x, curr_y, DIR_LEFT)){
 					game.start_move(curr_x, curr_y, DIR_LEFT);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[38] || (!game.single_steps && game.walk_dir == DIR_UP) || (game.prime_movement && game.walk_dir == DIR_UP)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[KEY_CODE_UP] || (!game.single_steps && game.walk_dir == DIR_UP) || (game.prime_movement && game.walk_dir == DIR_UP)){
 				game.prime_movement = just_prime;
 				if(!just_prime && game.walkable(curr_x, curr_y, DIR_UP)){
 					game.start_move(curr_x, curr_y, DIR_UP);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[39] || (!game.single_steps && game.walk_dir == DIR_RIGHT) || (game.prime_movement && game.walk_dir == DIR_RIGHT)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[KEY_CODE_RIGHT] || (!game.single_steps && game.walk_dir == DIR_RIGHT) || (game.prime_movement && game.walk_dir == DIR_RIGHT)){
 				game.prime_movement = just_prime;
 				if(!just_prime && game.walkable(curr_x, curr_y, DIR_RIGHT)){
 					game.start_move(curr_x, curr_y, DIR_RIGHT);
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[40] || (!game.single_steps && game.walk_dir == DIR_DOWN) || (game.prime_movement && game.walk_dir == DIR_DOWN)){
+			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[KEY_CODE_DOWN] || (!game.single_steps && game.walk_dir == DIR_DOWN) || (game.prime_movement && game.walk_dir == DIR_DOWN)){
 				game.prime_movement = just_prime;
 				if(!just_prime && game.walkable(curr_x, curr_y, DIR_DOWN)){
 					game.start_move(curr_x, curr_y, DIR_DOWN);
