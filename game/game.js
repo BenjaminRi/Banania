@@ -33,6 +33,8 @@ const DIR_LEFT = 1;
 const DIR_DOWN = 2;
 const DIR_RIGHT = 3;
 
+const KEY_CODE_ENTER = 13;
+const KEY_CODE_ESC   = 27;
 const KEY_CODE_LEFT  = 37;
 const KEY_CODE_UP    = 38;
 const KEY_CODE_RIGHT = 39;
@@ -547,19 +549,19 @@ function CLASS_input(){
 		game.remove_soundrestriction();
 		that.keys_down[evt.keyCode] = true;
 		if(evt.keyCode == KEY_CODE_LEFT){
-			game.walk_dir = DIR_LEFT;
+			game.last_dir_pressed = DIR_LEFT;
 		}else if(evt.keyCode == KEY_CODE_UP){
-			game.walk_dir = DIR_UP;
+			game.last_dir_pressed = DIR_UP;
 		}else if(evt.keyCode == KEY_CODE_RIGHT){
-			game.walk_dir = DIR_RIGHT;
+			game.last_dir_pressed = DIR_RIGHT;
 		}else if(evt.keyCode == KEY_CODE_DOWN){
-			game.walk_dir = DIR_DOWN;
+			game.last_dir_pressed = DIR_DOWN;
 		}
 		
 		if(vis.dbx.firstChild){// If a dialog box is open
-			if(that.keys_down[13]){// Enter
+			if(that.keys_down[KEY_CODE_ENTER]){
 				vis.dbx.enterfun();
-			}else if(that.keys_down[27]){// Esc
+			}else if(that.keys_down[KEY_CODE_ESC]){
 				vis.dbx.cancelfun();
 			}
 		}
@@ -1361,25 +1363,53 @@ function CLASS_game(){
 	
 	CLASS_entity.prototype.register_input = function(curr_x, curr_y, just_prime){
 		if(!this.moving){
-			if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_LEFT) || input.keys_down[KEY_CODE_LEFT] || (!game.single_steps && game.walk_dir == DIR_LEFT) || (game.prime_movement && game.walk_dir == DIR_LEFT)){
-				game.prime_movement = just_prime;
-				if(!just_prime && game.walkable(curr_x, curr_y, DIR_LEFT)){
-					game.start_move(curr_x, curr_y, DIR_LEFT);
+			for(let i = 0; i < 3; i++){
+				let dir_1 = DIR_NONE;
+				let dir_2 = DIR_NONE;
+				if(i == 0){
+					// Keyboard control
+					if(input.keys_down[KEY_CODE_LEFT] && !input.keys_down[KEY_CODE_RIGHT]){
+						dir_1 = DIR_LEFT;
+					}else if(!input.keys_down[KEY_CODE_LEFT] && input.keys_down[KEY_CODE_RIGHT]){
+						dir_1 = DIR_RIGHT;
+					}
+					
+					if(input.keys_down[KEY_CODE_UP] && !input.keys_down[KEY_CODE_DOWN]){
+						dir_2 = DIR_UP;
+					}else if(!input.keys_down[KEY_CODE_UP] && input.keys_down[KEY_CODE_DOWN]){
+						dir_2 = DIR_DOWN;
+					}
+					
+					if(game.last_dir_pressed == DIR_UP || game.last_dir_pressed == DIR_DOWN){
+						// Make sure that the preferred direction is what we last pressed
+						let swap_helper = dir_1;
+						dir_1 = dir_2;
+						dir_2 = swap_helper;
+					}
+					
+				}else if(i == 1){
+					// Touch control
+					if(IS_TOUCH_DEVICE){
+						dir_1 = input.joystick_dir;
+					}
+				}else if(i == 2){
+					// Auto walk control
+					if(!game.single_steps){
+						dir_1 = game.last_dir_pressed;
+					}
 				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_UP) || input.keys_down[KEY_CODE_UP] || (!game.single_steps && game.walk_dir == DIR_UP) || (game.prime_movement && game.walk_dir == DIR_UP)){
-				game.prime_movement = just_prime;
-				if(!just_prime && game.walkable(curr_x, curr_y, DIR_UP)){
-					game.start_move(curr_x, curr_y, DIR_UP);
-				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_RIGHT) || input.keys_down[KEY_CODE_RIGHT] || (!game.single_steps && game.walk_dir == DIR_RIGHT) || (game.prime_movement && game.walk_dir == DIR_RIGHT)){
-				game.prime_movement = just_prime;
-				if(!just_prime && game.walkable(curr_x, curr_y, DIR_RIGHT)){
-					game.start_move(curr_x, curr_y, DIR_RIGHT);
-				}
-			}else if((IS_TOUCH_DEVICE && input.joystick_dir == DIR_DOWN) || input.keys_down[KEY_CODE_DOWN] || (!game.single_steps && game.walk_dir == DIR_DOWN) || (game.prime_movement && game.walk_dir == DIR_DOWN)){
-				game.prime_movement = just_prime;
-				if(!just_prime && game.walkable(curr_x, curr_y, DIR_DOWN)){
-					game.start_move(curr_x, curr_y, DIR_DOWN);
+				
+				for(let j = 0; j < 2; j++){
+					let dir = DIR_NONE;
+					if(j == 0){
+						dir = dir_1;
+					}else if(j == 1){
+						dir = dir_2;
+					}
+					if(!just_prime && game.walkable(curr_x, curr_y, dir)){
+						game.start_move(curr_x, curr_y, dir);
+						return;
+					}
 				}
 			}
 		}
@@ -1440,7 +1470,7 @@ function CLASS_game(){
 	this.berti_positions;
 	
 	this.single_steps = true;
-	this.walk_dir = DIR_NONE;
+	this.last_dir_pressed = DIR_NONE;
 	
 	this.steps_taken = 0;
 	this.num_bananas = 0;
@@ -1456,7 +1486,6 @@ function CLASS_game(){
 	this.soundrestriction_removed = false;
 	
 	this.update_tick = 0;
-	this.prime_movement = false;
 	
 	this.load_level = function(lev_number){
 		that.mode = 1;
@@ -1468,7 +1497,7 @@ function CLASS_game(){
 		that.level_array = new Array();
 		that.level_number = lev_number;
 		that.wait_timer = LEV_START_DELAY*UPS;
-		that.walk_dir = DIR_NONE;
+		that.last_dir_pressed = DIR_NONE;
 		
 		if(that.level_unlocked < lev_number){
 			that.level_unlocked = lev_number;
@@ -2009,7 +2038,7 @@ function CLASS_game(){
 	
 	this.toggle_single_steps = function(){
 		if(that.single_steps){
-			that.walk_dir = DIR_NONE;
+			that.last_dir_pressed = DIR_NONE;
 			that.single_steps = false;
 		}else{
 			that.single_steps = true;
