@@ -25,3 +25,7 @@ Start the game by pressing the button that depicts our yellow protagonist betwee
 You are Berti, the garbage collector, who has been called into a warehouse to clean up after a runaway monkey. The monkey discovered banana trees here and has hidden on the 51st floor. However, on his escape, he ate a lot of bananas and carelessly threw the peels onto the floor. You must now make your way up through each floor, picking up after him and avoiding the garbage monsters.
 
 To get through each level, you'll also have to strategically move blocks to gain access to the banana peels and to block the monsters. Two types of monsters will be after you, but watch out for the purple ones as they can also move blocks.
+
+## Play online
+
+Also playable on [WASM Arcade](https://www.wasmarcade.online/arcade/banania/) — free, no download.
